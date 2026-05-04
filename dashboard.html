@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Panel Colmena Inteligente</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fff9c4; text-align: center; margin: 0; padding: 20px; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; max-width: 1000px; margin: 0 auto; }
+        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); border-bottom: 8px solid #fbc02d; }
+        h1 { color: #5d4037; margin-bottom: 30px; }
+        .valor { font-size: 2rem; font-weight: bold; color: #333; display: block; margin-top: 15px; }
+        .label { color: #795548; text-transform: uppercase; letter-spacing: 1px; font-size: 0.9rem; }
+    </style>
+</head>
+<body>
+
+    <h1>🐝 Panel de Monitoreo Realtime</h1>
+
+    <div class="grid">
+        <div class="card">
+            <div class="label">Temperatura</div>
+            <span id="temp_val" class="valor">--</span>
+        </div>
+        <div class="card">
+            <div class="label">Humedad</div>
+            <span id="hum_val" class="valor">--</span>
+        </div>
+        <div class="card">
+            <div class="label">Peso Celda</div>
+            <span id="peso_val" class="valor">--</span>
+        </div>
+        <div class="card">
+            <div class="label">Presencia (FC-51)</div>
+            <span id="presencia_val" class="valor">--</span>
+        </div>
+        <div class="card">
+            <div class="label">Micrófono</div>
+            <span id="ruido_val" class="valor">--</span>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        // TUS DATOS REALES DE FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyBwKBot_swtev-g7OxwFP9Jk_q2EGsAPnA",
+            authDomain: "colmenainteligente-ee7a8.firebaseapp.com",
+            databaseURL: "https://colmenainteligente-ee7a8-default-rtdb.firebaseio.com",
+            projectId: "colmenainteligente-ee7a8",
+            storageBucket: "colmenainteligente-ee7a8.firebasestorage.app",
+            messagingSenderId: "454952379571",
+            appId: "1:454952379571:web:4555ea465685074614bcc6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Referencias a los datos
+        onValue(ref(db, 'colmena/temperatura'), (s) => { document.getElementById("temp_val").innerText = s.val() + " °C"; });
+        onValue(ref(db, 'colmena/humedad'), (s) => { document.getElementById("hum_val").innerText = s.val() + " %"; });
+        onValue(ref(db, 'colmena/peso'), (s) => { document.getElementById("peso_val").innerText = s.val() + " g"; });
+        
+        onValue(ref(db, 'colmena/presencia'), (s) => {
+            const val = s.val();
+            document.getElementById("presencia_val").innerText = val ? "⚠️ OBJETO" : "Limpio";
+            document.getElementById("presencia_val").style.color = val ? "#d32f2f" : "#388e3c";
+        });
+
+        onValue(ref(db, 'colmena/ruido'), (s) => {
+            const val = s.val();
+            document.getElementById("ruido_val").innerText = val ? "🔊 SONIDO" : "Silencio";
+            document.getElementById("ruido_val").style.color = val ? "#f57c00" : "#757575";
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,124 @@
+/* Paleta de Colores Colmena */
+:root {
+    --honey-light: #FFECB3;
+    --honey-main: #FFC107;
+    --honey-dark: #FFA000;
+    --mustard: #E6A100;
+    --bee-black: #2C2C2C;
+    --bg-cream: #FFFDF5;
+}
+
+body {
+    font-family: 'Segoe UI', sans-serif;
+    background-color: var(--bg-cream);
+    /* Patrón sutil de hexágonos de fondo opcional */
+    background-image: url('https://www.transparenttextures.com/patterns/hexellence.png');
+    margin: 0;
+    color: var(--bee-black);
+}
+
+.container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 30px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 40px;
+    border-bottom: 4px solid var(--honey-main);
+    display: inline-block;
+    width: 100%;
+    padding-bottom: 10px;
+}
+
+h1 { 
+    margin: 0; 
+    color: var(--mustard); 
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+/* Grid Estilo Panal */
+.dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
+}
+
+.card {
+    background: white;
+    padding: 25px;
+    border-radius: 20px;
+    border: 2px solid var(--honey-light);
+    box-shadow: 0 6px 15px rgba(230, 161, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Adorno de esquina simulando panal */
+.card::before {
+    content: "⬢";
+    position: absolute;
+    top: -10px;
+    right: -5px;
+    font-size: 3rem;
+    color: var(--honey-light);
+    opacity: 0.3;
+}
+
+h3 {
+    margin-top: 0;
+    font-size: 1.2rem;
+    color: var(--mustard);
+    text-align: center;
+}
+
+/* Datos */
+.value {
+    font-size: 3rem;
+    font-weight: bold;
+    color: var(--bee-black);
+}
+
+.unit { 
+    font-size: 1.2rem; 
+    color: var(--honey-dark); 
+    font-weight: bold;
+}
+
+.label { 
+    color: #8d6e63; 
+    font-weight: bold;
+}
+
+/* Indicadores Binarios (Presencia y Sonido) */
+.status-indicator {
+    text-align: center;
+    padding: 15px;
+    border-radius: 50px; /* Forma de gota/óvalo */
+    font-weight: bold;
+    background: var(--honey-light);
+    color: var(--mustard);
+    border: 1px solid var(--honey-main);
+}
+
+.active-detection {
+    background: var(--honey-main);
+    color: var(--bee-black);
+    box-shadow: 0 0 15px var(--honey-main);
+}
+
+/* Barra de carga de peso (Color Miel) */
+.progress-bar {
+    background: #eee;
+    height: 15px;
+    border-radius: 10px;
+    margin-top: 20px;
+}
+
+#weight-bar {
+    background: linear-gradient(90deg, var(--honey-main), var(--mustard));
+    height: 100%;
+    border-radius: 10px;
+}
