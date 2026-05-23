@@ -24,13 +24,15 @@
         .header-container { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 40px; }
         .logo-app { width: 60px; height: 60px; object-fit: contain; }
         h1 { font-size: 2.2rem; color: var(--amarillo-miel); text-shadow: 0 0 15px rgba(255, 179, 0, 0.4); margin: 0; text-transform: uppercase; }
-        .view-card { background: var(--card-bg); border: 2px solid var(--cafe-dorado); border-radius: 15px; padding: 30px; width: 100%; max-width: 700px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .view-card { background: var(--card-bg); border: 2px solid var(--cafe-dorado); border-radius: 15px; padding: 30px; width: 100%; max-width: 700px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); box-sizing: border-box; }
         table { width: 100%; border-collapse: collapse; margin-top: 20px; color: #fff; }
-        th { background-color: var(--cafe-dorado); color: var(--amarillo-miel); padding: 12px; text-align: left; }
-        td { padding: 12px; border-bottom: 1px solid #333; }
-        tr:hover { background-color: rgba(255,179,0,0.05); }
+        th { background-color: var(--cafe-dorado); color: var(--amarillo-miel); padding: 12px; text-align: left; font-size: 0.95rem; text-transform: uppercase; border-bottom: 2px solid var(--amarillo-miel); }
+        td { padding: 12px; border-bottom: 1px solid #333; font-size: 1rem; color: #e0e0e0; }
+        tr:nth-child(even) { background-color: rgba(255, 255, 255, 0.02); }
+        tr:hover { background-color: rgba(255,179,0,0.08); }
         .btn-back { margin-top: 40px; background: transparent; color: #999; border: 1px solid #333; padding: 10px 22px; border-radius: 20px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
         .btn-back:hover { color: var(--amarillo-miel); border-color: var(--amarillo-miel); }
+        .empty-row { text-align: center; color: #777; font-style: italic; }
     </style>
 </head>
 <body>
@@ -39,33 +41,87 @@
         <h1>Historial de Datos</h1>
     </div>
     <div class="view-card">
-        <h2 id="sensor-name" style="color: var(--amarillo-miel); margin: 0;">Cargando...</h2>
+        <h2 id="sensor-name" style="color: var(--amarillo-miel); margin: 0; text-transform: capitalize;">Tabla Histórica</h2>
         
         <table>
             <thead>
                 <tr>
-                    <th>Fecha y Hora</th>
-                    <th>Muestra Registrada</th>
+                    <th>Fecha y Hora del Registro</th>
+                    <th>Muestra Capturada</th>
                 </tr>
             </thead>
-            <tbody>
-                <tr>
-                    <td>2026-05-22 14:30</td>
-                    <td>Valor Reciente de Prueba</td>
-                </tr>
-                <tr>
-                    <td>2026-05-22 13:30</td>
-                    <td>Valor Anterior de Prueba</td>
-                </tr>
+            <tbody id="tabla-historico-body">
+                <tr id="row-loading"><td colspan="2" class="empty-row">Esperando respuestas del servidor Firebase Realtime...</td></tr>
             </tbody>
         </table>
     </div>
     <button class="btn-back" onclick="window.location.href='dashboard.html'">⬅ Volver a Telemetría</button>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBwKBot_swtev-g7OxwFP9Jk_q2EGsAPnA",
+            authDomain: "colmenainteligente-ee7a8.firebaseapp.com",
+            databaseURL: "https://colmenainteligente-ee7a8-default-rtdb.firebaseio.com",
+            projectId: "colmenainteligente-ee7a8",
+            storageBucket: "colmenainteligente-ee7a8.firebasestorage.app",
+            messagingSenderId: "454952379571",
+            appId: "1:454952379571:web:4555ea465685074614bcc6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
         const params = new URLSearchParams(window.location.search);
-        const sensor = params.get('sensor') || 'general';
-        document.getElementById('sensor-name').innerText = "Tabla Histórica: " + sensor.toUpperCase();
+        const sensorKey = params.get('sensor') || 'temperatura';
+
+        const sensorMap = {
+            'poblacion': { label: 'Historial: Población Activa', dbPath: 'colmena/cantidad_abejas', unit: '🐝' },
+            'temperatura': { label: 'Historial: Temperatura', dbPath: 'colmena/temperatura', unit: '°C' },
+            'humedad': { label: 'Historial: Humedad', dbPath: 'colmena/humedad', unit: '%' },
+            'peso': { label: 'Historial: Peso del Panal', dbPath: 'colmena/peso', unit: 'g' },
+            'ruido': { label: 'Historial: Ruido Integrado', dbPath: 'colmena/ruido', unit: '' }
+        };
+
+        const currentSensor = sensorMap[sensorKey] || sensorMap['temperatura'];
+        document.getElementById('sensor-name').innerText = currentSensor.label;
+
+        const tbody = document.getElementById('tabla-historico-body');
+
+        // Escucha en tiempo real para ir acumulando los cambios que registre tu sensor en una Bitácora
+        onValue(ref(db, currentSensor.dbPath), (snapshot) => {
+            // Eliminar el mensaje de carga en la primera lectura
+            const loadingRow = document.getElementById('row-loading');
+            if(loadingRow) loadingRow.remove();
+
+            let valor = snapshot.val();
+            
+            // Traducir estatus binario de ruido a texto legible
+            if(sensorKey === 'ruido' && typeof valor === "boolean") {
+                valor = valor ? "⚠️ ALBOROTO" : "✅ ESTABLE";
+            } else if (valor !== null) {
+                valor = `${valor} ${currentSensor.unit}`;
+            }
+
+            if(valor !== null) {
+                // Obtener estampa de tiempo local del navegador del apicultor (2026)
+                const fechaActual = new Date();
+                const fechaFormateada = fechaActual.toLocaleDateString() + ' ' + fechaActual.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+                // Crear nueva fila
+                const nuevaFila = document.createElement('tr');
+                
+                nuevaFila.innerHTML = `
+                    <td>${fechaFormateada}</td>
+                    <td style="font-weight:bold; color: var(--amarillo-miel);">${valor}</td>
+                `;
+
+                // Insertar al inicio de la tabla para ver siempre el valor más nuevo arriba
+                tbody.insertBefore(nuevaFila, tbody.firstChild);
+            }
+        });
     </script>
 </body>
 </html>
