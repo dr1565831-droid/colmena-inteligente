@@ -6,11 +6,12 @@
     <title>Dashboard - Colmena Inteligente</title>
     <style>
         :root {
-            --bg-color: #0f0f0f;
-            --card-bg: rgba(30, 30, 30, 0.85);
-            --accent-yellow: #ffcc00;
+            --bg-color: #0f0f0f; /* Negro Profundo */
+            --card-bg: rgba(26, 26, 26, 0.9); 
+            --amarillo-miel: #ffb300;
+            --cafe-dorado: #b8860b;
             --text-color: #e0e0e0;
-            --border-glow: rgba(255, 204, 0, 0.25);
+            --border-glow: rgba(184, 134, 11, 0.35); /* Brillo Café Dorado */
         }
 
         body {
@@ -30,8 +31,8 @@
 
         h1 {
             font-size: 2.2rem;
-            color: var(--accent-yellow);
-            text-shadow: 0 0 15px rgba(255, 204, 0, 0.4);
+            color: var(--amarillo-miel);
+            text-shadow: 0 0 15px rgba(255, 179, 0, 0.4);
             margin-bottom: 40px;
             letter-spacing: 2px;
             text-transform: uppercase;
@@ -47,7 +48,7 @@
             padding: 20px;
         }
 
-        /* Estilo Hexagonal de Panal */
+        /* Estilo Panal de Abeja (Hexágono) */
         .card {
             background: var(--card-bg);
             width: 220px;
@@ -57,9 +58,8 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            border: 1px solid rgba(255, 204, 0, 0.08);
+            border: 1px solid rgba(184, 134, 11, 0.2);
             backdrop-filter: blur(10px);
-            /* Corta el contenedor de forma geométrica */
             clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
             transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
             box-shadow: 0 10px 30px rgba(0,0,0,0.6);
@@ -70,14 +70,14 @@
 
         .card:hover {
             transform: translateY(-8px) scale(1.03);
-            border: 1px solid var(--accent-yellow);
+            border: 1px solid var(--cafe-dorado);
             box-shadow: 0 0 25px var(--border-glow);
-            background: rgba(42, 42, 42, 0.95);
+            background: rgba(36, 36, 36, 0.95);
         }
 
         .label {
             font-size: 0.75rem;
-            color: var(--accent-yellow);
+            color: var(--amarillo-miel);
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 1.5px;
@@ -93,39 +93,38 @@
             z-index: 2;
         }
 
-        /* Icono decorativo sutil en el fondo de cada hexágono */
         .card::before {
             content: "⬢";
             position: absolute;
             font-size: 7rem;
-            color: rgba(255, 204, 0, 0.02);
+            color: rgba(255, 179, 0, 0.01);
             z-index: 1;
             pointer-events: none;
         }
 
-        /* Estilos dinámicos para el estado del sonido */
         .alert-noise { color: #ff4444 !important; text-shadow: 0 0 10px rgba(255, 68, 68, 0.6); }
         .status-quiet { color: #00ff88 !important; text-shadow: 0 0 10px rgba(0, 255, 136, 0.6); }
         
-        .btn-logout {
+        .btn-back {
             margin-top: 40px;
             background: transparent;
             color: #888;
             border: 1px solid #333;
-            padding: 8px 16px;
+            padding: 8px 18px;
             border-radius: 20px;
             cursor: pointer;
+            font-weight: bold;
             transition: all 0.3s;
         }
-        .btn-logout:hover {
-            color: #ff4444;
-            border-color: #ff4444;
+        .btn-back:hover {
+            color: var(--amarillo-miel);
+            border-color: var(--amarillo-miel);
         }
     </style>
 </head>
 <body>
 
-    <h1> Panel de Monitoreo de colmenas</h1>
+    <h1>🐝 Telemetría: Colmena 1</h1>
 
     <div class="grid">
         <div class="card">
@@ -144,21 +143,21 @@
         </div>
 
         <div class="card">
-            <div class="label">Peso Colmena</div>
+            <div class="label">Peso Estimado</div>
             <span id="peso_val" class="valor">-- g</span>
         </div>
 
         <div class="card">
-            <div class="label">Estado Acústico</div>
+            <div class="label">Estatus Ruido</div>
             <span id="ruido_val" class="valor">--</span>
         </div>
     </div>
 
-    <button id="logoutBtn" class="btn-logout">Cerrar Sesión</button>
+    <button id="backBtn" class="btn-back">⬅ Volver al Menú</button>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
         const firebaseConfig = {
@@ -175,44 +174,34 @@
         const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // --- PROTECCIÓN DE RUTA (Seguridad de Sesión) ---
+        // Control de Sesión
         onAuthStateChanged(auth, (user) => {
-            if (!user) {
-                // Si el usuario no está logueado en Google, lo regresa al login
-                window.location.href = "index.html";
-            } else {
-                console.log("Autenticado como:", user.displayName);
-                inicializarLecturaDatos();
-            }
+            if (!user) window.location.href = "index.html";
+            else inicializarLecturaDatos();
         });
 
-        // --- LECTURA DE DATOS EN TIEMPO REAL DESDE FIREBASE ---
+        // Enlace de datos síncronos con Realtime Database
         function inicializarLecturaDatos() {
-            // 1. Escucha del nuevo contador de abejas (F249)
             onValue(ref(db, 'colmena/cantidad_abejas'), (snapshot) => {
                 const data = snapshot.val();
                 document.getElementById("abejas_val").innerText = data !== null ? data + " 🐝" : "0 🐝";
             });
 
-            // 2. Escucha de Temperatura
             onValue(ref(db, 'colmena/temperatura'), (snapshot) => {
                 const data = snapshot.val();
                 document.getElementById("temp_val").innerText = data !== null ? parseFloat(data).toFixed(1) + " °C" : "-- °C";
             });
 
-            // 3. Escucha de Humedad
             onValue(ref(db, 'colmena/humedad'), (snapshot) => {
                 const data = snapshot.val();
                 document.getElementById("hum_val").innerText = data !== null ? parseFloat(data).toFixed(0) + " %" : "-- %";
             });
 
-            // 4. Escucha de Peso
             onValue(ref(db, 'colmena/peso'), (snapshot) => {
                 const data = snapshot.val();
                 document.getElementById("peso_val").innerText = data !== null ? data + " g" : "-- g";
             });
 
-            // 5. Escucha del Micrófono (Cambia de color e indicador según el estado)
             onValue(ref(db, 'colmena/ruido'), (snapshot) => {
                 const isNoisy = snapshot.val();
                 const el = document.getElementById("ruido_val");
@@ -226,9 +215,9 @@
             });
         }
 
-        // Botón para salir
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            signOut(auth).then(() => { window.location.href = "index.html"; });
+        // Retornar al menú de selección de colmenas
+        document.getElementById('backBtn').addEventListener('click', () => {
+            window.location.href = "menu.html";
         });
     </script>
 </body>
