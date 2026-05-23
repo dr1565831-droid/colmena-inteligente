@@ -6,15 +6,17 @@
     <title>Login - ABJ</title>
     <style>
         :root {
-            --bg-color: #0f0f0f;
-            --card-bg: rgba(30, 30, 30, 0.8);
-            --accent-yellow: #ffcc00;
+            --bg-color: #0f0f0f; /* Negro de fondo */
+            --card-bg: rgba(26, 26, 26, 0.85);
+            --amarillo-miel: #ffb300;
+            --cafe-dorado: #b8860b;
             --text-color: #e0e0e0;
         }
 
         body { 
-            font-family: 'Segoe UI', sans-serif; 
+            font-family: 'Segoe UI', Roboto, sans-serif; 
             background-color: var(--bg-color); 
+            /* Fondo sutil con patrón de hexágonos pequeños */
             background-image: radial-gradient(circle at 2px 2px, #1a1a1a 1px, transparent 0);
             background-size: 40px 40px;
             display: flex; 
@@ -28,18 +30,20 @@
             background: var(--card-bg); 
             padding: 40px; 
             border-radius: 20px; 
-            border: 1px solid rgba(255, 204, 0, 0.1);
+            border: 1px solid var(--cafe-dorado);
             backdrop-filter: blur(10px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.7); 
             text-align: center; 
             max-width: 350px;
             width: 100%;
         }
 
         h1 { 
-            color: var(--accent-yellow); 
-            text-shadow: 0 0 15px rgba(255, 204, 0, 0.4);
+            color: var(--amarillo-miel); 
+            text-shadow: 0 0 15px rgba(255, 179, 0, 0.4);
             margin-bottom: 5px;
+            font-size: 2.2rem;
+            letter-spacing: 2px;
         }
 
         p {
@@ -50,7 +54,7 @@
 
         .btn-google { 
             background-color: #ffffff; 
-            color: #222; 
+            color: #111111; 
             border: none; 
             padding: 12px 24px; 
             border-radius: 30px; 
@@ -68,9 +72,9 @@
         }
 
         .btn-google:hover { 
-            background-color: var(--accent-yellow); 
+            background-color: var(--amarillo-miel); 
             transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(255, 204, 0, 0.4);
+            box-shadow: 0 6px 20px rgba(255, 179, 0, 0.4);
         }
 
         img { width: 22px; }
@@ -79,8 +83,8 @@
 <body>
 
     <div class="login-card">
-        <h1>🐝 ABJ</h1>
-        <p>Monitoreo Automatizado colmenas</p>
+        <h1>🐝 COLMENA</h1>
+        <p>Monitoreo Automatizado de colmenas</p>
         
         <button id="loginBtn" class="btn-google">
             <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google">
@@ -92,7 +96,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-        // CONFIGURACIÓN OFICIAL DE TU PROYECTO
         const firebaseConfig = {
             apiKey: "AIzaSyBwKBot_swtev-g7OxwFP9Jk_q2EGsAPnA",
             authDomain: "colmenainteligente-ee7a8.firebaseapp.com",
@@ -110,11 +113,11 @@
         document.getElementById('loginBtn').addEventListener('click', () => {
             signInWithPopup(auth, provider)
                 .then((result) => {
-                    // Redirige al panel principal si el login de Google es exitoso
-                    window.location.href = "dashboard.html";
+                    // Redirige al menú de selección de colmenas
+                    window.location.href = "menu.html";
                 }).catch((error) => {
                     console.error("Error en login:", error.message);
-                    alert("Error al autenticar con Google. Verifica los dominios autorizados en Firebase.");
+                    alert("Error al autenticar con Google. Verifica la consola.");
                 });
         });
     </script>
