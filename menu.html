@@ -6,7 +6,7 @@
     <title>Menú - Colmena Inteligente</title>
     <style>
         :root {
-            --bg-color: #0f0f0f; /* Negro */
+            --bg-color: #0f0f0f;
             --amarillo-miel: #ffb300;
             --cafe-dorado: #b8860b;
             --card-bg: #1a1a1a;
@@ -14,20 +14,11 @@
             --shadow: rgba(0, 0, 0, 0.6);
         }
 
-        /* El interruptor del modo claro cambia sutilmente las opacidades pero respeta la paleta */
-        body.light-mode {
-            --bg-color: #151515;
-            --card-bg: #222222;
-        }
-
         body {
             font-family: 'Segoe UI', Roboto, sans-serif;
             background-color: var(--bg-color);
-            
-            /* 🔥 FONDO DE HEXÁGONOS EN SVG CORREGIDO (Garantiza que aparezca) */
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="98" viewBox="0 0 56 98"><path d="M28 0 L56 16.16 L56 48.49 L28 64.65 L0 48.49 L0 16.16 Z M28 98 L56 81.84 L56 49.51 L28 33.35 L0 49.51 L0 81.84 Z" fill="none" stroke="rgba(255, 179, 0, 0.05)" stroke-width="1"/></svg>');
             background-size: 56px 98px;
-            
             color: var(--text-color);
             margin: 0;
             display: flex;
@@ -35,10 +26,8 @@
             align-items: center;
             justify-content: center;
             height: 100vh;
-            transition: background 0.3s, color 0.3s;
         }
 
-        /* Encabezado unificado con Logo a la izquierda */
         .header-container {
             display: flex;
             align-items: center;
@@ -59,12 +48,10 @@
             color: var(--amarillo-miel);
             text-shadow: 0 0 20px rgba(255, 179, 0, 0.3);
             margin: 0;
-            text-align: center;
             line-height: 1;
             letter-spacing: 12px;
         }
 
-        /* Tarjeta de la Colmena */
         .colmena-card {
             background-color: var(--card-bg);
             border-radius: 20px;
@@ -76,16 +63,15 @@
             overflow: hidden;
             cursor: pointer;
             transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
-            border: 2px solid var(--cafe-dorado); /* Borde café dorado por defecto */
+            border: 2px solid var(--cafe-dorado);
         }
 
         .colmena-card:hover {
             transform: translateY(-5px);
-            border-color: var(--amarillo-miel); /* Ilumina a amarillo miel al pasar el cursor */
+            border-color: var(--amarillo-miel);
             box-shadow: 0 15px 35px rgba(255, 179, 0, 0.25);
         }
 
-        /* Contenedor de la foto colmena.png */
         .img-container {
             width: 40%;
             background-color: rgba(0, 0, 0, 0.3);
@@ -104,7 +90,6 @@
             object-fit: contain;
         }
 
-        /* Texto Colmena 1 */
         .text-container {
             width: 60%;
             padding: 30px;
@@ -116,7 +101,6 @@
             text-transform: uppercase;
         }
 
-        /* Panel Flotante de Configuración (Engranaje) */
         .config-wrapper {
             position: fixed;
             top: 25px;
@@ -148,38 +132,20 @@
             border-radius: 12px;
             box-shadow: 0 10px 25px var(--shadow);
             border: 1px solid var(--cafe-dorado);
-            padding: 20px;
-            width: 180px;
+            padding: 15px;
+            width: 150px;
             display: none;
             flex-direction: column;
-            gap: 15px;
         }
         .config-panel.show { display: flex; }
-
-        .config-title {
-            font-weight: bold;
-            font-size: 0.9rem;
-            border-bottom: 1px solid rgba(255, 179, 0, 0.2);
-            padding-bottom: 5px;
-            margin-bottom: 5px;
-            color: var(--amarillo-miel);
-        }
-
-        .option-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.95rem;
-            cursor: pointer;
-        }
 
         .logout-btn {
             background: transparent;
             color: #ff4444;
             border: none;
-            text-align: left;
+            text-align: center;
             padding: 5px 0;
-            font-size: 0.95rem;
+            font-size: 1rem;
             font-weight: bold;
             cursor: pointer;
             width: 100%;
@@ -191,10 +157,6 @@
     <div class="config-wrapper">
         <button class="gear-btn" id="gearBtn">⚙️</button>
         <div class="config-panel" id="configPanel">
-            <div class="config-title">Configuración</div>
-            <label class="option-row">
-                <input type="checkbox" id="darkModeToggle" checked> Modo Oscuro
-            </label>
             <button class="logout-btn" id="logoutBtn">Cerrar Sesión</button>
         </div>
     </div>
@@ -246,23 +208,7 @@
         });
 
         document.addEventListener('click', () => {
-            configPanel.classList.remove('show');
-        });
-
-        const darkModeToggle = document.getElementById('darkModeToggle');
-        if (localStorage.getItem('theme') === 'light') {
-            document.body.classList.add('light-mode');
-            darkModeToggle.checked = false;
-        }
-
-        darkModeToggle.addEventListener('change', () => {
-            if (!darkModeToggle.checked) {
-                document.body.classList.add('light-mode');
-                localStorage.setItem('theme', 'light');
-            } else {
-                document.body.classList.remove('light-mode');
-                localStorage.setItem('theme', 'dark');
-            }
+            configPanel.classList.remove('remove');
         });
 
         document.getElementById('logoutBtn').addEventListener('click', () => {
