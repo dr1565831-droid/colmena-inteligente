@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Historial Gráfico - Colmena Inteligente</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --bg-color: #0f0f0f;
@@ -24,27 +25,123 @@
         .header-container { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 40px; }
         .logo-app { width: 60px; height: 60px; object-fit: contain; }
         h1 { font-size: 2.2rem; color: var(--amarillo-miel); text-shadow: 0 0 15px rgba(255, 179, 0, 0.4); margin: 0; text-transform: uppercase; }
-        .view-card { background: var(--card-bg); border: 2px solid var(--cafe-dorado); border-radius: 15px; padding: 30px; width: 100%; max-width: 700px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
-        .placeholder-text { font-size: 1.2rem; color: #888; margin: 40px 0; }
+        .view-card { background: var(--card-bg); border: 2px solid var(--cafe-dorado); border-radius: 15px; padding: 30px; width: 100%; max-width: 800px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5); box-sizing: border-box;}
+        .chart-container { position: relative; width: 100%; height: 350px; margin-top: 20px; }
         .btn-back { margin-top: 40px; background: transparent; color: #999; border: 1px solid #333; padding: 10px 22px; border-radius: 20px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
         .btn-back:hover { color: var(--amarillo-miel); border-color: var(--amarillo-miel); }
+        .loading { font-size: 1.2rem; color: var(--amarillo-miel); margin: 40px 0; }
     </style>
 </head>
 <body>
     <div class="header-container">
         <img src="logo.png" alt="Logo" class="logo-app">
-        <h1 id="page-title">Gráfica de Sensor</h1>
+        <h1>Gráfica de Sensor</h1>
     </div>
     <div class="view-card">
-        <h2 id="sensor-name" style="color:#fff;">Cargando...</h2>
-        <div class="placeholder-text">📈 Aquí se renderizará el gráfico evolutivo de Firebase en tiempo real.</div>
+        <h2 id="sensor-name" style="color:#fff; margin-bottom: 10px; text-transform: capitalize;">Cargando Analíticas...</h2>
+        <div id="loading-text" class="loading">Conectando con la colmena...</div>
+        <div class="chart-container">
+            <canvas id="realtimeChart"></canvas>
+        </div>
     </div>
     <button class="btn-back" onclick="window.location.href='dashboard.html'">⬅ Volver a Telemetría</button>
 
-    <script>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+
+        // Tu configuración unificada de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBwKBot_swtev-g7OxwFP9Jk_q2EGsAPnA",
+            authDomain: "colmenainteligente-ee7a8.firebaseapp.com",
+            databaseURL: "https://colmenainteligente-ee7a8-default-rtdb.firebaseio.com",
+            projectId: "colmenainteligente-ee7a8",
+            storageBucket: "colmenainteligente-ee7a8.firebasestorage.app",
+            messagingSenderId: "454952379571",
+            appId: "1:454952379571:web:4555ea465685074614bcc6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Capturar el parámetro del sensor de la URL (?sensor=poblacion)
         const params = new URLSearchParams(window.location.search);
-        const sensor = params.get('sensor') || 'general';
-        document.getElementById('sensor-name').innerText = "Visualización analítica: " + sensor.toUpperCase();
+        const sensorKey = params.get('sensor') || 'temperatura';
+
+        // Mapear el nombre estético e identificar la ruta en tu Firebase Realtime Database
+        const sensorMap = {
+            'poblacion': { label: 'Población Activa (Abejas)', dbPath: 'colmena/cantidad_abejas', unit: '🐝' },
+            'temperatura': { label: 'Temperatura Externa e Interna', dbPath: 'colmena/temperatura', unit: '°C' },
+            'humedad': { label: 'Humedad Relativa', dbPath: 'colmena/humedad', unit: '%' },
+            'peso': { label: 'Peso del Panal', dbPath: 'colmena/peso', unit: 'g' },
+            'ruido': { label: 'Frecuencia de Ruido (0=Estable, 1=Alboroto)', dbPath: 'colmena/ruido', unit: '' }
+        };
+
+        const currentSensor = sensorMap[sensorKey] || sensorMap['temperatura'];
+        document.getElementById('sensor-name').innerText = currentSensor.label;
+
+        // Configuración Inicial de la Gráfica Lineal (Estética Abeja)
+        const ctx = document.getElementById('realtimeChart').getContext('2d');
+        const maxDataPoints = 10; // Cantidad máxima de muestras en pantalla simulando un historial dinámico
+        
+        const chartData = {
+            labels: [],
+            datasets: [{
+                label: `${currentSensor.label} (${currentSensor.unit})`,
+                data: [],
+                borderColor: '#ffb300', // Amarillo miel
+                backgroundColor: 'rgba(184, 134, 11, 0.2)', // Café dorado translúcido
+                borderWidth: 3,
+                pointBackgroundColor: '#ffffff',
+                pointBorderColor: '#b8860b',
+                pointRadius: 5,
+                tension: 0.3,
+                fill: true
+            }]
+        };
+
+        const config = {
+            type: 'line',
+            data: chartData,
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { labels: { color: '#e0e0e0', font: { size: 12 } } }
+                },
+                scales: {
+                    x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#999' } },
+                    y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#999' } }
+                }
+            }
+        };
+
+        const myChart = new Chart(ctx, config);
+
+        // Escuchar Firebase e ir insertando los puntos dinámicamente en orden cronológico inverso/directo
+        onValue(ref(db, currentSensor.dbPath), (snapshot) => {
+            document.getElementById('loading-text').style.display = 'none';
+            let valor = snapshot.val();
+            
+            // Tratamiento especial si es booleano (estatus ruido)
+            if(typeof valor === "boolean") {
+                valor = valor ? 1 : 0;
+            }
+
+            if (valor !== null) {
+                const ahora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+                
+                // Agregar dato a la gráfica
+                if (myChart.data.labels.length >= maxDataPoints) {
+                    myChart.data.labels.shift();
+                    myChart.data.datasets[0].data.shift();
+                }
+                
+                myChart.data.labels.push(ahora);
+                myChart.data.datasets[0].data.push(valor);
+                myChart.update();
+            }
+        });
     </script>
 </body>
 </html>
