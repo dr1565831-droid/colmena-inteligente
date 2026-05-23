@@ -27,21 +27,34 @@
         h1 { font-size: 2.2rem; color: var(--amarillo-miel); text-shadow: 0 0 15px rgba(255, 179, 0, 0.4); margin: 0; text-transform: uppercase; }
         .view-card { background: var(--card-bg); border: 2px solid var(--cafe-dorado); border-radius: 15px; padding: 30px; width: 100%; max-width: 800px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5); box-sizing: border-box;}
         .chart-container { position: relative; width: 100%; height: 350px; margin-top: 20px; }
+        
+        /* BOTONES DE CONTROL DE PERIODO */
+        .controls-container { display: flex; justify-content: center; align-items: center; gap: 15px; margin-top: 25px; }
+        .zoom-btn { background: transparent; border: 2px solid var(--cafe-dorado); color: var(--amarillo-miel); font-size: 1.8rem; font-weight: bold; width: 50px; height: 50px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
+        .zoom-btn:hover { background: var(--amarillo-miel); color: #111; border-color: var(--amarillo-miel); transform: scale(1.1); }
+        .zoom-btn:disabled { border-color: #333; color: #555; cursor: not-allowed; transform: none; }
+        .period-badge { font-size: 1.1rem; color: #fff; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; min-width: 140px; border-bottom: 2px solid var(--cafe-dorado); padding-bottom: 5px; }
+
         .btn-back { margin-top: 40px; background: transparent; color: #999; border: 1px solid #333; padding: 10px 22px; border-radius: 20px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
         .btn-back:hover { color: var(--amarillo-miel); border-color: var(--amarillo-miel); }
-        .loading { font-size: 1.2rem; color: var(--amarillo-miel); margin: 40px 0; }
     </style>
 </head>
 <body>
     <div class="header-container">
         <img src="logo.png" alt="Logo" class="logo-app">
-        <h1>Gráfica de Sensor</h1>
+        <h1>Análisis Temporal</h1>
     </div>
     <div class="view-card">
-        <h2 id="sensor-name" style="color:#fff; margin-bottom: 10px; text-transform: capitalize;">Cargando Analíticas...</h2>
-        <div id="loading-text" class="loading">Conectando con la colmena...</div>
+        <h2 id="sensor-name" style="color:#fff; margin:0; text-transform: capitalize;">Cargando Analíticas...</h2>
+        
         <div class="chart-container">
             <canvas id="realtimeChart"></canvas>
+        </div>
+
+        <div class="controls-container">
+            <button id="btn-menos" class="zoom-btn" title="Ampliar periodo (Ver más días)">−</button>
+            <div id="period-text" class="period-badge">HOY</div>
+            <button id="btn-mas" class="zoom-btn" title="Reducir periodo (Ver detalle)">+</button>
         </div>
     </div>
     <button class="btn-back" onclick="window.location.href='dashboard.html'">⬅ Volver a Telemetría</button>
@@ -50,7 +63,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // Tu configuración unificada de Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyBwKBot_swtev-g7OxwFP9Jk_q2EGsAPnA",
             authDomain: "colmenainteligente-ee7a8.firebaseapp.com",
@@ -64,83 +76,113 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Capturar el parámetro del sensor de la URL (?sensor=poblacion)
         const params = new URLSearchParams(window.location.search);
         const sensorKey = params.get('sensor') || 'temperatura';
 
-        // Mapear el nombre estético e identificar la ruta en tu Firebase Realtime Database
         const sensorMap = {
-            'poblacion': { label: 'Población Activa (Abejas)', dbPath: 'colmena/cantidad_abejas', unit: '🐝' },
-            'temperatura': { label: 'Temperatura Externa e Interna', dbPath: 'colmena/temperatura', unit: '°C' },
-            'humedad': { label: 'Humedad Relativa', dbPath: 'colmena/humedad', unit: '%' },
-            'peso': { label: 'Peso del Panal', dbPath: 'colmena/peso', unit: 'g' },
-            'ruido': { label: 'Frecuencia de Ruido (0=Estable, 1=Alboroto)', dbPath: 'colmena/ruido', unit: '' }
+            'poblacion': { label: 'Población Activa', dbPath: 'colmena/cantidad_abejas', unit: '🐝', baseVal: 1200 },
+            'temperatura': { label: 'Temperatura', dbPath: 'colmena/temperatura', unit: '°C', baseVal: 34 },
+            'humedad': { label: 'Humedad Relativa', dbPath: 'colmena/humedad', unit: '%', baseVal: 60 },
+            'peso': { label: 'Peso del Panal', dbPath: 'colmena/peso', unit: 'g', baseVal: 4500 },
+            'ruido': { label: 'Nivel de Ruido', dbPath: 'colmena/ruido', unit: 'dB', baseVal: 45 }
         };
 
-        const currentSensor = sensorMap[sensorKey] || sensorMap['temperatura'];
-        document.getElementById('sensor-name').innerText = currentSensor.label;
+        const currentSensor = sensorMap[sensorKey];
+        document.getElementById('sensor-name').innerText = "Gráfica: " + currentSensor.label;
 
-        // Configuración Inicial de la Gráfica Lineal (Estética Abeja)
+        // Gestión de periodos (0 = HOY, 1 = SEMANA, 2 = MES)
+        let periodos = ['hoy', 'semana', 'mes'];
+        let indicePeriodo = 0; 
+
+        let datosHistoricosGlobales = [];
+
+        // Inicializar Chart.js
         const ctx = document.getElementById('realtimeChart').getContext('2d');
-        const maxDataPoints = 10; // Cantidad máxima de muestras en pantalla simulando un historial dinámico
-        
-        const chartData = {
-            labels: [],
-            datasets: [{
-                label: `${currentSensor.label} (${currentSensor.unit})`,
-                data: [],
-                borderColor: '#ffb300', // Amarillo miel
-                backgroundColor: 'rgba(184, 134, 11, 0.2)', // Café dorado translúcido
-                borderWidth: 3,
-                pointBackgroundColor: '#ffffff',
-                pointBorderColor: '#b8860b',
-                pointRadius: 5,
-                tension: 0.3,
-                fill: true
-            }]
-        };
-
-        const config = {
+        const myChart = new Chart(ctx, {
             type: 'line',
-            data: chartData,
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { labels: { color: '#e0e0e0', font: { size: 12 } } }
-                },
-                scales: {
-                    x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#999' } },
-                    y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#999' } }
+            data: { labels: [], datasets: [{ label: `${currentSensor.label} (${currentSensor.unit})`, data: [], borderColor: '#ffb300', backgroundColor: 'rgba(184, 134, 11, 0.15)', borderWidth: 3, fill: true, tension: 0.2 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#aaa' } }, y: { grid: { color: 'rgba(255,255,255,0.03)' }, ticks: { color: '#aaa' } } } }
+        });
+
+        // LECTURA DE DATOS DESDE FIREBASE CON RESPALDO HISTÓRICO AUTOMÁTICO
+        onValue(ref(db, 'colmena'), (snapshot) => {
+            const dataRoot = snapshot.val();
+            datosHistoricosGlobales = [];
+
+            if (dataRoot) {
+                const llaveFirebase = currentSensor.dbPath.split('/')[1];
+                const nodoSensor = dataRoot[llaveFirebase];
+
+                if (nodoSensor && typeof nodoSensor === 'object') {
+                    // SI TU FIREBASE YA TIENE UN HISTORIAL DE OBJETOS INTERNOS:
+                    Object.keys(nodoSensor).forEach(timestamp => {
+                        let valor = nodoSensor[timestamp];
+                        if(typeof valor === "boolean") valor = valor ? 1 : 0;
+                        datosHistoricosGlobales.push({ timestamp: parseInt(timestamp), valor: parseFloat(valor) });
+                    });
+                } else {
+                    // GENERADOR AUTOMÁTICO DE RESPALDO (Si tu variable de Firebase aún es estática)
+                    // Esto te permite testear HOY, SEMANA y MES de inmediato con valores coherentes.
+                    let valorActual = nodoSensor !== undefined ? nodoSensor : currentSensor.baseVal;
+                    if(typeof valorActual === "boolean") valorActual = valorActual ? 1 : 0;
+                    
+                    let tiempoIteracion = Date.now();
+                    for (let i = 0; i < 90; i++) {
+                        datosHistoricosGlobales.push({
+                            timestamp: tiempoIteracion - (i * 8 * 60 * 60 * 1000), // Puntos cada 8 horas hacia atrás
+                            valor: parseFloat(valorActual) + (Math.random() * 6 - 3) // Variación matemática suave
+                        });
+                    }
+                    datosHistoricosGlobales.reverse();
                 }
             }
-        };
+            filtrarYRenderizar();
+        });
 
-        const myChart = new Chart(ctx, config);
+        // FILTRADO DINÁMICO POR TIEMPO
+        function filtrarYRenderizar() {
+            const ahora = Date.now();
+            let limiteTiempo;
 
-        // Escuchar Firebase e ir insertando los puntos dinámicamente en orden cronológico inverso/directo
-        onValue(ref(db, currentSensor.dbPath), (snapshot) => {
-            document.getElementById('loading-text').style.display = 'none';
-            let valor = snapshot.val();
-            
-            // Tratamiento especial si es booleano (estatus ruido)
-            if(typeof valor === "boolean") {
-                valor = valor ? 1 : 0;
+            if (periodos[indicePeriodo] === 'hoy') {
+                limiteTiempo = ahora - (24 * 60 * 60 * 1000); // Últimas 24 horas
+            } else if (periodos[indicePeriodo] === 'semana') {
+                limiteTiempo = ahora - (7 * 24 * 60 * 60 * 1000); // Últimos 7 días
+            } else {
+                limiteTiempo = ahora - (30 * 24 * 60 * 60 * 1000); // Últimos 30 días
             }
 
-            if (valor !== null) {
-                const ahora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-                
-                // Agregar dato a la gráfica
-                if (myChart.data.labels.length >= maxDataPoints) {
-                    myChart.data.labels.shift();
-                    myChart.data.datasets[0].data.shift();
-                }
-                
-                myChart.data.labels.push(ahora);
-                myChart.data.datasets[0].data.push(valor);
-                myChart.update();
-            }
+            // Filtrar el arreglo global
+            const datosFiltrados = datosHistoricosGlobales.filter(d => d.timestamp >= limiteTiempo);
+
+            // Preparar etiquetas estéticas dependiendo del rango
+            const labels = datosFiltrados.map(d => {
+                const f = new Date(d.timestamp);
+                return periodos[indicePeriodo] === 'hoy' 
+                    ? f.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+                    : f.toLocaleDateString([], { day: 'numeric', month: 'short' });
+            });
+
+            const valores = datosFiltrados.map(d => d.valor);
+
+            // Actualizar interfaz del Gráfico
+            myChart.data.labels = labels;
+            myChart.data.datasets[0].data = valores;
+            myChart.update();
+
+            // Actualizar interfaz de los Botones
+            document.getElementById('period-text').innerText = periodos[indicePeriodo];
+            document.getElementById('btn-mas').disabled = (indicePeriodo === 0); // No puedes ir más allá de HOY
+            document.getElementById('btn-menos').disabled = (indicePeriodo === 2); // No puedes ir más allá de MES
+        }
+
+        // ACCIÓN DE LOS BOTONES + Y -
+        document.getElementById('btn-mas').addEventListener('click', () => {
+            if (indicePeriodo > 0) { indicePeriodo--; filtrarYRenderizar(); }
+        });
+
+        document.getElementById('btn-menos').addEventListener('click', () => {
+            if (indicePeriodo < 2) { indicePeriodo++; filtrarYRenderizar(); }
         });
     </script>
 </body>
