@@ -6,39 +6,27 @@
     <title>Menú - Colmena Inteligente</title>
     <style>
         :root {
-            /* Colores (Modo Claro) */
-            --bg-color: #f5f2eb; 
-            --hex-color: rgba(184, 134, 11, 0.12); /* Café dorado para el panal */
-            --negro: #111111;
+            --bg-color: #0f0f0f; /* Negro */
             --amarillo-miel: #ffb300;
             --cafe-dorado: #b8860b;
-            --card-bg: #ffffff;
-            --text-color: #111111;
-            --shadow: rgba(0, 0, 0, 0.06);
-        }
-
-        body.dark-mode {
-            /* Colores (Modo Oscuro) */
-            --bg-color: #0f0f0f; 
-            --hex-color: rgba(255, 179, 0, 0.04); /* Amarillo miel para el panal */
             --card-bg: #1a1a1a;
             --text-color: #e0e0e0;
-            --shadow: rgba(0, 0, 0, 0.5);
+            --shadow: rgba(0, 0, 0, 0.6);
+        }
+
+        /* El interruptor del modo claro cambia sutilmente las opacidades pero respeta la paleta */
+        body.light-mode {
+            --bg-color: #151515;
+            --card-bg: #222222;
         }
 
         body {
             font-family: 'Segoe UI', Roboto, sans-serif;
             background-color: var(--bg-color);
             
-            /* Fondo corregido: Patrón matemático de hexágonos reales (Panal de abeja) */
-            background-image: 
-                polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%),
-                linear-gradient(30deg, var(--hex-color) 25%, transparent 25%, transparent 75%, var(--hex-color) 75%, var(--hex-color)),
-                linear-gradient(210deg, var(--hex-color) 25%, transparent 25%, transparent 75%, var(--hex-color) 75%, var(--hex-color)),
-                linear-gradient(150deg, var(--hex-color) 25%, transparent 25%, transparent 75%, var(--hex-color) 75%, var(--hex-color)),
-                linear-gradient(330deg, var(--hex-color) 25%, transparent 25%, transparent 75%, var(--hex-color) 75%, var(--hex-color));
-            background-size: 40px 70px;
-            background-position: 0 0, 0 0, 20px 35px, 20px 35px, 0 0;
+            /* 🔥 FONDO DE HEXÁGONOS EN SVG CORREGIDO (Garantiza que aparezca) */
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="98" viewBox="0 0 56 98"><path d="M28 0 L56 16.16 L56 48.49 L28 64.65 L0 48.49 L0 16.16 Z M28 98 L56 81.84 L56 49.51 L28 33.35 L0 49.51 L0 81.84 Z" fill="none" stroke="rgba(255, 179, 0, 0.05)" stroke-width="1"/></svg>');
+            background-size: 56px 98px;
             
             color: var(--text-color);
             margin: 0;
@@ -50,17 +38,17 @@
             transition: background 0.3s, color 0.3s;
         }
 
-        /* Contenedor del Encabezado (Logo + Texto ABJ) */
+        /* Encabezado unificado con Logo a la izquierda */
         .header-container {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 20px; /* Espacio entre el logo y las letras ABJ */
+            gap: 20px; 
             margin-bottom: 40px;
         }
 
         .logo-app {
-            width: 80px; /* Tamaño del logotipo */
+            width: 80px; 
             height: 80px;
             object-fit: contain;
         }
@@ -68,16 +56,12 @@
         h1 {
             font-size: 5rem;
             font-weight: 900;
-            color: var(--negro);
-            letter-spacing: 12px;
+            color: var(--amarillo-miel);
+            text-shadow: 0 0 20px rgba(255, 179, 0, 0.3);
             margin: 0;
             text-align: center;
             line-height: 1;
-            transition: color 0.3s;
-        }
-        body.dark-mode h1 {
-            color: var(--amarillo-miel);
-            text-shadow: 0 0 20px rgba(255, 179, 0, 0.3);
+            letter-spacing: 12px;
         }
 
         /* Tarjeta de la Colmena */
@@ -92,30 +76,26 @@
             overflow: hidden;
             cursor: pointer;
             transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
-            border: 2px solid transparent;
+            border: 2px solid var(--cafe-dorado); /* Borde café dorado por defecto */
         }
 
         .colmena-card:hover {
             transform: translateY(-5px);
-            border-color: var(--amarillo-miel);
+            border-color: var(--amarillo-miel); /* Ilumina a amarillo miel al pasar el cursor */
             box-shadow: 0 15px 35px rgba(255, 179, 0, 0.25);
         }
 
-        /* Contenedor de la foto de la colmena */
+        /* Contenedor de la foto colmena.png */
         .img-container {
             width: 40%;
-            background-color: rgba(184, 134, 11, 0.03);
+            background-color: rgba(0, 0, 0, 0.3);
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
-            border-right: 1px solid rgba(0,0,0,0.06);
+            border-right: 2px solid var(--cafe-dorado);
             box-sizing: border-box;
             height: 180px;
-        }
-        body.dark-mode .img-container {
-            border-right: 1px solid rgba(255,255,255,0.06);
-            background-color: rgba(255, 179, 0, 0.01);
         }
 
         .img-container img {
@@ -124,19 +104,19 @@
             object-fit: contain;
         }
 
-        /* Contenedor del texto "Colmena 1" */
+        /* Texto Colmena 1 */
         .text-container {
             width: 60%;
             padding: 30px;
             text-align: center;
-            font-size: 2rem;
+            font-size: 2.2rem;
             font-weight: bold;
-            color: var(--text-color);
+            color: #ffffff;
             letter-spacing: 2px;
             text-transform: uppercase;
         }
 
-        /* Configuración de Botones Flotantes (Engranaje) */
+        /* Panel Flotante de Configuración (Engranaje) */
         .config-wrapper {
             position: fixed;
             top: 25px;
@@ -146,7 +126,7 @@
 
         .gear-btn {
             background: var(--card-bg);
-            border: 1px solid rgba(0,0,0,0.1);
+            border: 1px solid var(--cafe-dorado);
             box-shadow: 0 4px 15px var(--shadow);
             width: 45px;
             height: 45px;
@@ -158,7 +138,6 @@
             font-size: 22px;
             transition: transform 0.3s;
         }
-        body.dark-mode .gear-btn { border-color: #333; }
         .gear-btn:hover { transform: rotate(45deg); }
 
         .config-panel {
@@ -168,25 +147,23 @@
             background: var(--card-bg);
             border-radius: 12px;
             box-shadow: 0 10px 25px var(--shadow);
-            border: 1px solid rgba(0,0,0,0.08);
+            border: 1px solid var(--cafe-dorado);
             padding: 20px;
             width: 180px;
             display: none;
             flex-direction: column;
             gap: 15px;
         }
-        body.dark-mode .config-panel { border-color: #333; }
         .config-panel.show { display: flex; }
 
         .config-title {
             font-weight: bold;
             font-size: 0.9rem;
-            border-bottom: 1px solid rgba(0,0,0,0.1);
+            border-bottom: 1px solid rgba(255, 179, 0, 0.2);
             padding-bottom: 5px;
             margin-bottom: 5px;
-            color: var(--cafe-dorado);
+            color: var(--amarillo-miel);
         }
-        body.dark-mode .config-title { color: var(--amarillo-miel); border-bottom-color: #333; }
 
         .option-row {
             display: flex;
@@ -198,7 +175,7 @@
 
         .logout-btn {
             background: transparent;
-            color: #d32f2f;
+            color: #ff4444;
             border: none;
             text-align: left;
             padding: 5px 0;
@@ -207,7 +184,6 @@
             cursor: pointer;
             width: 100%;
         }
-        .logout-btn:hover { color: #ff4444; }
     </style>
 </head>
 <body>
@@ -217,7 +193,7 @@
         <div class="config-panel" id="configPanel">
             <div class="config-title">Configuración</div>
             <label class="option-row">
-                <input type="checkbox" id="darkModeToggle"> Modo Oscuro
+                <input type="checkbox" id="darkModeToggle" checked> Modo Oscuro
             </label>
             <button class="logout-btn" id="logoutBtn">Cerrar Sesión</button>
         </div>
@@ -274,18 +250,18 @@
         });
 
         const darkModeToggle = document.getElementById('darkModeToggle');
-        if (localStorage.getItem('theme') === 'dark') {
-            document.body.classList.add('dark-mode');
-            darkModeToggle.checked = true;
+        if (localStorage.getItem('theme') === 'light') {
+            document.body.classList.add('light-mode');
+            darkModeToggle.checked = false;
         }
 
         darkModeToggle.addEventListener('change', () => {
-            if (darkModeToggle.checked) {
-                document.body.classList.add('dark-mode');
-                localStorage.setItem('theme', 'dark');
-            } else {
-                document.body.classList.remove('dark-mode');
+            if (!darkModeToggle.checked) {
+                document.body.classList.add('light-mode');
                 localStorage.setItem('theme', 'light');
+            } else {
+                document.body.classList.remove('light-mode');
+                localStorage.setItem('theme', 'dark');
             }
         });
 
