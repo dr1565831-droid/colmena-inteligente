@@ -3,40 +3,109 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Colmena Inteligente</title>
+    <title>Histórico - Colmena Inteligente</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background-color: #f4f4f9; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        th, td { padding: 15px; border: 1px solid #ddd; text-align: center; }
-        th { background-color: #4CAF50; color: white; }
-        tr:nth-child(even) { background-color: #f9f9f9; }
-        h1 { color: #333; text-align: center; }
+        :root {
+            --bg-color: #0f0f0f;
+            --amarillo-miel: #ffb300;
+            --cafe-dorado: #b8860b;
+            --text-color: #e0e0e0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        h1 {
+            color: var(--amarillo-miel);
+            text-shadow: 0 0 15px rgba(255, 179, 0, 0.4);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .table-container {
+            width: 90%;
+            max-width: 800px;
+            margin-top: 20px;
+            background: rgba(26, 26, 26, 0.95);
+            border: 2px solid var(--cafe-dorado);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background-color: var(--cafe-dorado);
+            color: #0f0f0f;
+            padding: 15px;
+            text-align: left;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid rgba(184, 134, 11, 0.3);
+        }
+
+        tr:last-child td { border-bottom: none; }
+        
+        tr:hover { background-color: rgba(255, 179, 0, 0.1); }
+
+        .btn-back {
+            margin-top: 30px;
+            background: transparent;
+            color: var(--text-color);
+            border: 1px solid var(--cafe-dorado);
+            padding: 10px 22px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-back:hover {
+            color: #0f0f0f;
+            background-color: var(--amarillo-miel);
+            border-color: var(--amarillo-miel);
+        }
     </style>
 </head>
 <body>
 
-    <h1>Historial de la Colmena</h1>
-    <table id="tabla-datos">
-        <thead>
-            <tr>
-                <th>Fecha/Hora</th>
-                <th>Abejas</th>
-                <th>Temp (°C)</th>
-                <th>Humedad (%)</th>
-                <th>Peso</th>
-                <th>Ruido</th>
-            </tr>
-        </thead>
-        <tbody id="tbody-datos">
-            <tr><td colspan="6">Cargando datos...</td></tr>
-        </tbody>
-    </table>
+    <h1 id="titulo-historico">Histórico de Sensor</h1>
+    
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Hora de Registro</th>
+                    <th>Valor</th>
+                </tr>
+            </thead>
+            <tbody id="tabla-body">
+                </tbody>
+        </table>
+    </div>
+
+    <button class="btn-back" onclick="window.location.href='dashboard.html'">⬅ Volver al Dashboard</button>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getDatabase, ref, onValue, query, limitToLast } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // --- TU CONFIGURACIÓN INTEGRADA ---
         const firebaseConfig = {
             apiKey: "AIzaSyBwKBot_swtev-g7OxwFP9Jk_q2EGsAPnA",
             authDomain: "colmenainteligente-ee7a8.firebaseapp.com",
@@ -50,38 +119,35 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Referencia al nodo 'historial'
-        const historialRef = query(ref(db, 'historial/'), limitToLast(20));
+        const params = new URLSearchParams(window.location.search);
+        const sensor = params.get('sensor');
+        
+        document.getElementById('titulo-historico').innerText = `Histórico: ${sensor.toUpperCase()}`;
 
-        onValue(historialRef, (snapshot) => {
+        let firebasePath = `colmena/${sensor}`;
+        if(sensor === 'poblacion') firebasePath = 'colmena/cantidad_abejas';
+
+        const tbody = document.getElementById('tabla-body');
+
+        // Para este ejemplo, registramos los cambios en tiempo real en la tabla
+        // Lo ideal para históricos profundos es usar push() en la base de datos para listas.
+        onValue(ref(db, firebasePath), (snapshot) => {
             const data = snapshot.val();
-            const tbody = document.getElementById('tbody-datos');
-            tbody.innerHTML = ''; 
+            const now = new Date().toLocaleTimeString();
+            
+            let valorMostrar = data;
+            if (sensor === 'poblacion' && data !== null) {
+                valorMostrar = parseInt(data, 10);
+            }
 
-            if (data) {
-                // Invertimos las claves para mostrar lo más reciente primero
-                const keys = Object.keys(data).reverse();
-                
-                keys.forEach((key) => {
-                    const item = data[key];
-                    const fila = document.createElement('tr');
-                    
-                    // Convertir el timestamp del servidor a fecha legible
-                    const fechaObj = new Date(item.fecha);
-                    const fecha = fechaObj.toLocaleString();
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${now}</td><td style="font-weight: bold; color: var(--amarillo-miel);">${valorMostrar}</td>`;
+            
+            tbody.insertBefore(tr, tbody.firstChild);
 
-                    fila.innerHTML = `
-                        <td>${fecha}</td>
-                        <td>${item.abejas}</td>
-                        <td>${item.temp ? item.temp.toFixed(1) : 'N/A'}</td>
-                        <td>${item.hum ? item.hum.toFixed(1) : 'N/A'}</td>
-                        <td>${item.peso ? item.peso.toFixed(2) : '0'}</td>
-                        <td>${item.ruido ? "Sí" : "No"}</td>
-                    `;
-                    tbody.appendChild(fila);
-                });
-            } else {
-                tbody.innerHTML = '<tr><td colspan="6">No hay datos aún. Esperando al ESP32...</td></tr>';
+            // Mantener solo los últimos 15 registros visualmente
+            if (tbody.children.length > 15) {
+                tbody.removeChild(tbody.lastChild);
             }
         });
     </script>
