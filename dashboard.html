@@ -2,48 +2,165 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Panel Colmena Inteligente</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Colmena Inteligente</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #fff9c4; text-align: center; margin: 0; padding: 20px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; max-width: 1000px; margin: 0 auto; }
-        .card { background: white; padding: 25px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); border-bottom: 8px solid #fbc02d; }
-        h1 { color: #5d4037; margin-bottom: 30px; }
-        .valor { font-size: 2rem; font-weight: bold; color: #333; display: block; margin-top: 15px; }
-        .label { color: #795548; text-transform: uppercase; letter-spacing: 1px; font-size: 0.9rem; }
+        :root {
+            --bg-color: #0f0f0f;
+            --card-bg: rgba(30, 30, 30, 0.85);
+            --accent-yellow: #ffcc00;
+            --text-color: #e0e0e0;
+            --border-glow: rgba(255, 204, 0, 0.25);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 2px 2px, #1a1a1a 1px, transparent 0);
+            background-size: 40px 40px;
+            color: var(--text-color);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            color: var(--accent-yellow);
+            text-shadow: 0 0 15px rgba(255, 204, 0, 0.4);
+            margin-bottom: 40px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 35px;
+            max-width: 1100px;
+            padding: 20px;
+        }
+
+        /* Estilo Hexagonal de Panal */
+        .card {
+            background: var(--card-bg);
+            width: 220px;
+            height: 250px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border: 1px solid rgba(255, 204, 0, 0.08);
+            backdrop-filter: blur(10px);
+            /* Corta el contenedor de forma geométrica */
+            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+            text-align: center;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .card:hover {
+            transform: translateY(-8px) scale(1.03);
+            border: 1px solid var(--accent-yellow);
+            box-shadow: 0 0 25px var(--border-glow);
+            background: rgba(42, 42, 42, 0.95);
+        }
+
+        .label {
+            font-size: 0.75rem;
+            color: var(--accent-yellow);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 8px;
+            z-index: 2;
+        }
+
+        .valor {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #ffffff;
+            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            z-index: 2;
+        }
+
+        /* Icono decorativo sutil en el fondo de cada hexágono */
+        .card::before {
+            content: "⬢";
+            position: absolute;
+            font-size: 7rem;
+            color: rgba(255, 204, 0, 0.02);
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        /* Estilos dinámicos para el estado del sonido */
+        .alert-noise { color: #ff4444 !important; text-shadow: 0 0 10px rgba(255, 68, 68, 0.6); }
+        .status-quiet { color: #00ff88 !important; text-shadow: 0 0 10px rgba(0, 255, 136, 0.6); }
+        
+        .btn-logout {
+            margin-top: 40px;
+            background: transparent;
+            color: #888;
+            border: 1px solid #333;
+            padding: 8px 16px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .btn-logout:hover {
+            color: #ff4444;
+            border-color: #ff4444;
+        }
     </style>
 </head>
 <body>
 
-    <h1>🐝 Panel de Monitoreo Realtime</h1>
+    <h1> Panel de Monitoreo de colmenas</h1>
 
     <div class="grid">
         <div class="card">
-            <div class="label">Temperatura</div>
-            <span id="temp_val" class="valor">--</span>
+            <div class="label">Población Activa</div>
+            <span id="abejas_val" class="valor">--</span>
         </div>
+
+        <div class="card">
+            <div class="label">Temperatura</div>
+            <span id="temp_val" class="valor">-- °C</span>
+        </div>
+
         <div class="card">
             <div class="label">Humedad</div>
-            <span id="hum_val" class="valor">--</span>
+            <span id="hum_val" class="valor">-- %</span>
         </div>
+
         <div class="card">
-            <div class="label">Peso Celda</div>
-            <span id="peso_val" class="valor">--</span>
+            <div class="label">Peso Colmena</div>
+            <span id="peso_val" class="valor">-- g</span>
         </div>
+
         <div class="card">
-            <div class="label">Presencia (FC-51)</div>
-            <span id="presencia_val" class="valor">--</span>
-        </div>
-        <div class="card">
-            <div class="label">Micrófono</div>
+            <div class="label">Estado Acústico</div>
             <span id="ruido_val" class="valor">--</span>
         </div>
     </div>
 
+    <button id="logoutBtn" class="btn-logout">Cerrar Sesión</button>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // TUS DATOS REALES DE FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyBwKBot_swtev-g7OxwFP9Jk_q2EGsAPnA",
             authDomain: "colmenainteligente-ee7a8.firebaseapp.com",
@@ -55,23 +172,63 @@
         };
 
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // Referencias a los datos
-        onValue(ref(db, 'colmena/temperatura'), (s) => { document.getElementById("temp_val").innerText = s.val() + " °C"; });
-        onValue(ref(db, 'colmena/humedad'), (s) => { document.getElementById("hum_val").innerText = s.val() + " %"; });
-        onValue(ref(db, 'colmena/peso'), (s) => { document.getElementById("peso_val").innerText = s.val() + " g"; });
-        
-        onValue(ref(db, 'colmena/presencia'), (s) => {
-            const val = s.val();
-            document.getElementById("presencia_val").innerText = val ? "⚠️ OBJETO" : "Limpio";
-            document.getElementById("presencia_val").style.color = val ? "#d32f2f" : "#388e3c";
+        // --- PROTECCIÓN DE RUTA (Seguridad de Sesión) ---
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                // Si el usuario no está logueado en Google, lo regresa al login
+                window.location.href = "index.html";
+            } else {
+                console.log("Autenticado como:", user.displayName);
+                inicializarLecturaDatos();
+            }
         });
 
-        onValue(ref(db, 'colmena/ruido'), (s) => {
-            const val = s.val();
-            document.getElementById("ruido_val").innerText = val ? "🔊 SONIDO" : "Silencio";
-            document.getElementById("ruido_val").style.color = val ? "#f57c00" : "#757575";
+        // --- LECTURA DE DATOS EN TIEMPO REAL DESDE FIREBASE ---
+        function inicializarLecturaDatos() {
+            // 1. Escucha del nuevo contador de abejas (F249)
+            onValue(ref(db, 'colmena/cantidad_abejas'), (snapshot) => {
+                const data = snapshot.val();
+                document.getElementById("abejas_val").innerText = data !== null ? data + " 🐝" : "0 🐝";
+            });
+
+            // 2. Escucha de Temperatura
+            onValue(ref(db, 'colmena/temperatura'), (snapshot) => {
+                const data = snapshot.val();
+                document.getElementById("temp_val").innerText = data !== null ? parseFloat(data).toFixed(1) + " °C" : "-- °C";
+            });
+
+            // 3. Escucha de Humedad
+            onValue(ref(db, 'colmena/humedad'), (snapshot) => {
+                const data = snapshot.val();
+                document.getElementById("hum_val").innerText = data !== null ? parseFloat(data).toFixed(0) + " %" : "-- %";
+            });
+
+            // 4. Escucha de Peso
+            onValue(ref(db, 'colmena/peso'), (snapshot) => {
+                const data = snapshot.val();
+                document.getElementById("peso_val").innerText = data !== null ? data + " g" : "-- g";
+            });
+
+            // 5. Escucha del Micrófono (Cambia de color e indicador según el estado)
+            onValue(ref(db, 'colmena/ruido'), (snapshot) => {
+                const isNoisy = snapshot.val();
+                const el = document.getElementById("ruido_val");
+                if (isNoisy) {
+                    el.innerText = "ALBOROTO";
+                    el.className = "valor alert-noise";
+                } else {
+                    el.innerText = "ESTABLE";
+                    el.className = "valor status-quiet";
+                }
+            });
+        }
+
+        // Botón para salir
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            signOut(auth).then(() => { window.location.href = "index.html"; });
         });
     </script>
 </body>
