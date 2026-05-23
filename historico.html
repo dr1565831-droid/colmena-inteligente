@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valor Histórico - Colmena Inteligente</title>
+    <style>
+        :root {
+            --bg-color: #0f0f0f;
+            --card-bg: rgba(26, 26, 26, 0.95); 
+            --amarillo-miel: #ffb300;
+            --cafe-dorado: #b8860b;
+            --text-color: #e0e0e0;
+        }
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="98" viewBox="0 0 56 98"><path d="M28 0 L56 16.16 L56 48.49 L28 64.65 L0 48.49 L0 16.16 Z M28 98 L56 81.84 L56 49.51 L28 33.35 L0 49.51 L0 81.84 Z" fill="none" stroke="rgba(255, 179, 0, 0.05)" stroke-width="1"/></svg>');
+            background-size: 56px 98px;
+            color: var(--text-color);
+            margin: 0; padding: 40px 20px;
+            display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box;
+        }
+        .header-container { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 40px; }
+        .logo-app { width: 60px; height: 60px; object-fit: contain; }
+        h1 { font-size: 2.2rem; color: var(--amarillo-miel); text-shadow: 0 0 15px rgba(255, 179, 0, 0.4); margin: 0; text-transform: uppercase; }
+        .view-card { background: var(--card-bg); border: 2px solid var(--cafe-dorado); border-radius: 15px; padding: 30px; width: 100%; max-width: 700px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; color: #fff; }
+        th { background-color: var(--cafe-dorado); color: var(--amarillo-miel); padding: 12px; text-align: left; }
+        td { padding: 12px; border-bottom: 1px solid #333; }
+        tr:hover { background-color: rgba(255,179,0,0.05); }
+        .btn-back { margin-top: 40px; background: transparent; color: #999; border: 1px solid #333; padding: 10px 22px; border-radius: 20px; cursor: pointer; font-weight: bold; transition: all 0.3s; }
+        .btn-back:hover { color: var(--amarillo-miel); border-color: var(--amarillo-miel); }
+    </style>
+</head>
+<body>
+    <div class="header-container">
+        <img src="logo.png" alt="Logo" class="logo-app">
+        <h1>Historial de Datos</h1>
+    </div>
+    <div class="view-card">
+        <h2 id="sensor-name" style="color: var(--amarillo-miel); margin: 0;">Cargando...</h2>
+        
+        <table>
+            <thead>
+                <tr>
+                    <th>Fecha y Hora</th>
+                    <th>Muestra Registrada</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>2026-05-22 14:30</td>
+                    <td>Valor Reciente de Prueba</td>
+                </tr>
+                <tr>
+                    <td>2026-05-22 13:30</td>
+                    <td>Valor Anterior de Prueba</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <button class="btn-back" onclick="window.location.href='dashboard.html'">⬅ Volver a Telemetría</button>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const sensor = params.get('sensor') || 'general';
+        document.getElementById('sensor-name').innerText = "Tabla Histórica: " + sensor.toUpperCase();
+    </script>
+</body>
+</html>
