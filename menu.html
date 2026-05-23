@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menú - Colmena Inteligente</title>
+    <style>
+        /* Paleta de colores oficial solicitada */
+        :root {
+            --bg-color: #f7f5f0; /* Fondo claro por defecto */
+            --hex-color: rgba(218, 165, 32, 0.1); /* Exágonos sutiles */
+            --negro: #111111;
+            --amarillo-miel: #ffb300;
+            --cafe-dorado: #b8860b;
+            --card-bg: #ffffff;
+            --text-color: #111111;
+            --shadow: rgba(0, 0, 0, 0.1);
+        }
+
+        /* Estilos cuando el Modo Oscuro esté activo */
+        body.dark-mode {
+            --bg-color: #0f0f0f;
+            --hex-color: rgba(255, 179, 0, 0.05);
+            --card-bg: #1a1a1a;
+            --text-color: #e0e0e0;
+            --shadow: rgba(0, 0, 0, 0.5);
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            /* Fondo con patrón de hexágonos CSS */
+            background-image: 
+                radial-gradient(circle at 50% 50%, transparent 45%, var(--hex-color) 49%, var(--hex-color) 51%, transparent 55%),
+                radial-gradient(circle at 0 0, transparent 45%, var(--hex-color) 49%, var(--hex-color) 51%, transparent 55%);
+            background-size: 30px 52px;
+            color: var(--text-color);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        /* Título Principal */
+        h1 {
+            font-size: 5rem;
+            font-weight: 900;
+            color: var(--negro);
+            letter-spacing: 10px;
+            margin: 0 0 40px 0;
+            text-align: center;
+            transition: color 0.3s;
+        }
+        body.dark-mode h1 {
+            color: var(--amarillo-miel);
+            text-shadow: 0 0 20px rgba(255, 179, 0, 0.3);
+        }
+
+        /* Contenedor / Tarjeta de la Colmena */
+        .colmena-card {
+            background-color: var(--card-bg);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px var(--shadow);
+            display: flex;
+            align-items: center;
+            width: 90%;
+            max-width: 650px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .colmena-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--amarillo-miel);
+            box-shadow: 0 15px 35px rgba(255, 179, 0, 0.2);
+        }
+
+        /* Apartado de Imagen */
+        .img-container {
+            width: 40%;
+            background-color: rgba(218, 165, 32, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            border-right: 1px solid rgba(0,0,0,0.05);
+        }
+        body.dark-mode .img-container {
+            border-right: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .img-container img {
+            max-width: 100%;
+            max-height: 150px;
+            object-fit: contain;
+        }
+
+        /* Apartado de Texto */
+        .text-container {
+            width: 60%;
+            padding: 40px;
+            text-align: center;
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--text-color);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        /* Menú de Configuración Flotante (Engranaje) */
+        .config-wrapper {
+            position: fixed;
+            top: 25px;
+            left: 25px;
+            z-index: 100;
+        }
+
+        .gear-btn {
+            background: var(--card-bg);
+            border: 1px solid rgba(0,0,0,0.1);
+            box-shadow: 0 4px 15px var(--shadow);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 24px;
+            transition: transform 0.3s;
+        }
+        body.dark-mode .gear-btn {
+            border-color: #333;
+        }
+
+        .gear-btn:hover {
+            transform: rotate(45deg);
+        }
+
+        /* Panel Desplegable */
+        .config-panel {
+            position: absolute;
+            top: 55px;
+            left: 0;
+            background: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px var(--shadow);
+            border: 1px solid rgba(0,0,0,0.05);
+            padding: 20px;
+            width: 180px;
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+        }
+        body.dark-mode .config-panel {
+            border-color: #333;
+        }
+
+        .config-panel.show {
+            display: flex;
+        }
+
+        .config-title {
+            font-weight: bold;
+            font-size: 0.9rem;
+            border-bottom: 1px solid rgba(0,0,0,0.1);
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+        }
+        body.dark-mode .config-title {
+            border-bottom-color: #333;
+        }
+
+        /* Opción Modo Oscuro (Checkbox) */
+        .option-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.95rem;
+            cursor: pointer;
+        }
+
+        /* Botón Cerrar Sesión */
+        .logout-btn {
+            background: transparent;
+            color: #d32f2f;
+            border: none;
+            text-align: left;
+            padding: 5px 0;
+            font-size: 0.95rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+        }
+        .logout-btn:hover {
+            color: #ff4444;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="config-wrapper">
+        <button class="gear-btn" id="gearBtn">⚙️</button>
+        <div class="config-panel" id="configPanel">
+            <div class="config-title">Configuración</div>
+            <label class="option-row">
+                <input type="checkbox" id="darkModeToggle"> Modo Oscuro
+            </label>
+            <button class="logout-btn" id="logoutBtn">Cerrar Sesión</button>
+        </div>
+    </div>
+
+    <h1>A B J</h1>
+
+    <div class="colmena-card" id="colmena1">
+        <div class="img-container">
+            <img src="https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&fit=crop&q=80&w=400" alt="Colmena">
+        </div>
+        <div class="text-container">
+            Colmena 1
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyBwKBot_swtev-g7OxwFP9Jk_q2EGsAPnA",
+            authDomain: "colmenainteligente-ee7a8.firebaseapp.com",
+            databaseURL: "https://colmenainteligente-ee7a8-default-rtdb.firebaseio.com",
+            projectId: "colmenainteligente-ee7a8",
+            storageBucket: "colmenainteligente-ee7a8.firebasestorage.app",
+            messagingSenderId: "454952379571",
+            appId: "1:454952379571:web:4555ea465685074614bcc6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+
+        // Control de sesión
+        onAuthStateChanged(auth, (user) => {
+            if (!user) window.location.href = "index.html";
+        });
+
+        // Evento click para ir al Dashboard de la Colmena 1
+        document.getElementById('colmena1').addEventListener('click', () => {
+            window.location.href = "dashboard.html";
+        });
+
+        // Desplegar menú de configuración
+        const gearBtn = document.getElementById('gearBtn');
+        const configPanel = document.getElementById('configPanel');
+        gearBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            configPanel.classList.toggle('show');
+        });
+
+        // Cerrar el panel si se hace click afuera
+        document.addEventListener('click', () => {
+            configPanel.classList.remove('show');
+        });
+
+        // --- LÓGICA DE MODO OSCURO ---
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        
+        // Guardar la preferencia en el navegador del usuario
+        if (localStorage.getItem('theme') === 'dark') {
+            document.body.classList.add('dark-mode');
+            darkModeToggle.checked = true;
+        }
+
+        darkModeToggle.addEventListener('change', () => {
+            if (darkModeToggle.checked) {
+                document.body.classList.add('dark-mode');
+                localStorage.setItem('theme', 'dark');
+            } else {
+                document.body.classList.remove('dark-mode');
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        // Cerrar Sesión
+        document.getElementById('logoutBtn').addEventListener('click', () => {
+            signOut(auth).then(() => { window.location.href = "index.html"; });
+        });
+    </script>
+</body>
+</html>
