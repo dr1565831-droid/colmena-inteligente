@@ -6,7 +6,7 @@
     <title>Login - Colmena Inteligente</title>
     <style>
         :root {
-            --bg-color: #0f0f0f; /* Negro */
+            --bg-color: #0f0f0f;
             --amarillo-miel: #ffb300;
             --cafe-dorado: #b8860b;
             --card-bg: rgba(26, 26, 26, 0.9);
@@ -16,7 +16,6 @@
         body { 
             font-family: 'Segoe UI', Roboto, sans-serif; 
             background-color: var(--bg-color); 
-            /* 🔥 FONDO DE HEXÁGONOS EN SVG CORREGIDO (Garantiza que aparezca) */
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="98" viewBox="0 0 56 98"><path d="M28 0 L56 16.16 L56 48.49 L28 64.65 L0 48.49 L0 16.16 Z M28 98 L56 81.84 L56 49.51 L28 33.35 L0 49.51 L0 81.84 Z" fill="none" stroke="rgba(184, 134, 11, 0.15)" stroke-width="1"/></svg>');
             background-size: 56px 98px;
             display: flex; 
@@ -38,7 +37,6 @@
             width: 100%;
         }
 
-        /* Encabezado unificado con Logo a la izquierda */
         .header-container {
             display: flex;
             align-items: center;
@@ -132,11 +130,10 @@
 
         document.getElementById('loginBtn').addEventListener('click', () => {
             signInWithPopup(auth, provider)
-                .then((result) => {
+                .then(() => {
                     window.location.href = "menu.html";
                 }).catch((error) => {
                     console.error("Error en login:", error.message);
-                    alert("Error al autenticar con Google.");
                 });
         });
     </script>
