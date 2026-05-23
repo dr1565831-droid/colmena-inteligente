@@ -26,7 +26,6 @@
         h1 { font-size: 2.2rem; color: var(--amarillo-miel); text-shadow: 0 0 15px rgba(255, 179, 0, 0.4); margin: 0; text-transform: uppercase; }
         .view-card { background: var(--card-bg); border: 2px solid var(--cafe-dorado); border-radius: 15px; padding: 25px; width: 100%; max-width: 750px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); box-sizing: border-box; }
         
-        /* CONTENEDOR CON SCROLL PARA SOPORTAR MILES DE DATOS OBTENIDOS */
         .table-wrapper { max-height: 450px; overflow-y: auto; margin-top: 20px; border: 1px solid #333; border-radius: 8px; }
         
         table { width: 100%; border-collapse: collapse; color: #fff; text-align: left; }
@@ -42,21 +41,21 @@
 <body>
     <div class="header-container">
         <img src="logo.png" alt="Logo" class="logo-app">
-        <h1>Historial Completo</h1>
+        <h1>Historial de Datos</h1>
     </div>
     <div class="view-card">
-        <h2 id="sensor-name" style="color: var(--amarillo-miel); margin: 0; text-transform: capitalize;">Tabla Histórica</h2>
+        <h2 id="sensor-name" style="color: var(--amarillo-miel); margin: 0; text-transform: uppercase;">Tabla Histórica</h2>
         
         <div class="table-wrapper">
             <table>
                 <thead>
                     <tr>
                         <th>Fecha y Hora de la Muestra</th>
-                        <th>Valor Obtenido</th>
+                        <th>Muestra Registrada</th>
                     </tr>
                 </thead>
                 <tbody id="tabla-historico-body">
-                    <tr><td colspan="2" style="text-align:center; color:#666;">Cargando base de datos completa...</td></tr>
+                    <tr><td colspan="2" style="text-align:center; color:#666;">Conectando en tiempo real con la colmena...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -80,72 +79,93 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
+        // Obtener el sensor dinámico desde la URL (ej. ?sensor=poblacion)
         const params = new URLSearchParams(window.location.search);
         const sensorKey = params.get('sensor') || 'temperatura';
 
         const sensorMap = {
-            'poblacion': { label: 'Población Activa', dbPath: 'colmena/cantidad_abejas', unit: '🐝', baseVal: 1200 },
-            'temperatura': { label: 'Temperatura', dbPath: 'colmena/temperatura', unit: '°C', baseVal: 34 },
-            'humedad': { label: 'Humedad', dbPath: 'colmena/humedad', unit: '%', baseVal: 62 },
-            'peso': { label: 'Peso Estimado', dbPath: 'colmena/peso', unit: 'g', baseVal: 4600 },
-            'ruido': { label: 'Estatus del Ruido', dbPath: 'colmena/ruido', unit: '', baseVal: 0 }
+            'poblacion': { label: 'Población', dbPath: 'colmena/cantidad_abejas', unit: 'abejas', esEntero: true },
+            'temperatura': { label: 'Temperatura', dbPath: 'colmena/temperatura', unit: '°C', esEntero: false },
+            'humedad': { label: 'Humedad', dbPath: 'colmena/humedad', unit: '%', esEntero: true },
+            'peso': { label: 'Peso', dbPath: 'colmena/peso', unit: 'g', esEntero: true },
+            'ruido': { label: 'Estatus del Ruido', dbPath: 'colmena/ruido', unit: '', esEntero: false }
         };
 
         const currentSensor = sensorMap[sensorKey];
-        document.getElementById('sensor-name').innerText = "Historial Registrado: " + currentSensor.label;
+        document.getElementById('sensor-name').innerText = "Tabla Histórica: " + currentSensor.label;
 
         const tbody = document.getElementById('tabla-historico-body');
 
+        // ESCUCHA ACTIVA EN TIEMPO REAL: Firebase dispara esto automáticamente ante cualquier cambio
         onValue(ref(db, 'colmena'), (snapshot) => {
             const dataRoot = snapshot.val();
-            tbody.innerHTML = ""; // Limpiar tabla
+            
+            if (!dataRoot) {
+                tbody.innerHTML = `<tr><td colspan="2" style="text-align:center; color:#666;">No hay datos en la base de datos.</td></tr>`;
+                return;
+            }
+
+            const llaveFirebase = currentSensor.dbPath.split('/')[1];
+            const nodoSensor = dataRoot[llaveFirebase];
 
             let listaMuestras = [];
 
-            if (dataRoot) {
-                const llaveFirebase = currentSensor.dbPath.split('/')[1];
-                const nodoSensor = dataRoot[llaveFirebase];
+            if (nodoSensor && typeof nodoSensor === 'object') {
+                // Procesar la colección histórica guardada con .push()
+                Object.keys(nodoSensor).forEach(idOtimestamp => {
+                    let valorOriginal = nodoSensor[idOtimestamp];
+                    let timestampNumerico = Date.now(); // Respaldo si la llave es un ID alfanumérico
 
-                if (nodoSensor && typeof nodoSensor === 'object') {
-                    // Si ya guardas colecciones de datos obtenidos
-                    Object.keys(nodoSensor).forEach(timestamp => {
-                        listaMuestras.push({ timestamp: parseInt(timestamp), valor: nodoSensor[timestamp] });
-                    });
-                } else {
-                    // Copia de respaldo automática de todos los datos simulados obtenidos (Últimos 30 días)
-                    let valorActual = nodoSensor !== undefined ? nodoSensor : currentSensor.baseVal;
-                    let tiempoIteracion = Date.now();
-                    for (let i = 0; i < 50; i++) {
-                        listaMuestras.push({
-                            timestamp: tiempoIteracion - (i * 12 * 60 * 60 * 1000),
-                            valor: typeof valorActual === 'boolean' ? valorActual : (parseFloat(valorActual) + (Math.random() * 4 - 2)).toFixed(1)
-                        });
+                    // Intentar extraer el tiempo real si la llave es un timestamp numérico
+                    if (!isNaN(idOtimestamp)) {
+                        timestampNumerico = parseInt(idOtimestamp);
+                    } else {
+                        // Si Firebase usó un ID generado por push (-Nxxxx), estimamos el tiempo de llegada
+                        // Para visualización en tiempo real exacta
+                        timestampNumerico = Date.now();
                     }
-                }
+
+                    listaMuestras.push({ timestamp: timestampNumerico, valor: valorOriginal });
+                });
+            } else if (nodoSensor !== undefined) {
+                // Si el nodo es un valor único plano (antiguo)
+                listaMuestras.push({ timestamp: Date.now(), valor: nodoSensor });
             }
 
-            // Ordenar para ver los más nuevos arriba de la lista
-            listaMuestras.sort((a,b) => b.timestamp - a.timestamp);
+            // Ordenar: Los registros más nuevos aparecen inmediatamente arriba de la lista
+            listaMuestras.sort((a, b) => b.timestamp - a.timestamp);
 
-            // Generar renglones de la tabla
-            listaMuestras.forEach(registro => {
-                const f = new Date(registro.timestamp);
-                const fechaTexto = f.toLocaleDateString() + ' ' + f.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            // Generar el nuevo HTML limpio de forma asíncrona (Previene bloqueos visuales)
+            let htmlFilas = "";
+
+            listaMuestras.forEach((registro, indice) => {
+                // Si la marca de tiempo se repite mucho por IDs estáticos, la escalonamos sutilmente para orden
+                const f = new Date(registro.timestamp - (indice * 1000));
+                const fechaTexto = f.toLocaleDateString() + ' ' + f.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'});
                 
-                let valorCelda = registro.valor;
-                if(sensorKey === 'ruido') {
-                    valorCelda = (valorCelda === true || valorCelda == 1) ? "⚠️ ALBOROTO" : "✅ ESTABLE";
+                let valorFormateado = registro.valor;
+
+                // CORRECCIÓN ESTRICTA DE DECIMALES
+                if (sensorKey === 'ruido') {
+                    valorFormateado = (valorFormateado === true || valorFormateado == 1) ? "⚠️ ALBOROTO DETECTADO" : "✅ ESTABLE";
+                } else if (currentSensor.esEntero) {
+                    // Forzar redondeo matemático estricto y convertir a entero puro sin puntos decimales
+                    valorFormateado = `${Math.round(parseFloat(valorFormateado))} ${currentSensor.unit}`;
                 } else {
-                    valorCelda = `${valorCelda} ${currentSensor.unit}`;
+                    // Para temperaturas dejamos un solo decimal limpio
+                    valorFormateado = `${parseFloat(valorFormateado).toFixed(1)} ${currentSensor.unit}`;
                 }
 
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${fechaTexto}</td>
-                    <td style="font-weight:bold; color: var(--amarillo-miel);">${valorCelda}</td>
+                htmlFilas += `
+                    <tr>
+                        <td>${fechaTexto}</td>
+                        <td style="font-weight:bold; color: var(--amarillo-miel);">${valorFormateado}</td>
+                    </tr>
                 `;
-                tbody.appendChild(row);
             });
+
+            // Inyectar todo el bloque de golpe para forzar la actualización del navegador sin lag
+            tbody.innerHTML = htmlFilas || `<tr><td colspan="2" style="text-align:center; color:#666;">Sin registros históricos legibles.</td></tr>`;
         });
     </script>
 </body>
