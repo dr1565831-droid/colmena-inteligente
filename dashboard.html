@@ -6,22 +6,18 @@
     <title>Dashboard - Colmena Inteligente</title>
     <style>
         :root {
-            --bg-color: #0f0f0f; /* Negro Profundo */
+            --bg-color: #0f0f0f;
             --card-bg: rgba(26, 26, 26, 0.95); 
             --amarillo-miel: #ffb300;
             --cafe-dorado: #b8860b;
             --text-color: #e0e0e0;
-            --border-glow: rgba(184, 134, 11, 0.35);
         }
 
         body {
             font-family: 'Segoe UI', Roboto, sans-serif;
             background-color: var(--bg-color);
-            
-            /* 🔥 FONDO DE HEXÁGONOS EN SVG CORREGIDO (Mismo patrón corporativo) */
             background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="98" viewBox="0 0 56 98"><path d="M28 0 L56 16.16 L56 48.49 L28 64.65 L0 48.49 L0 16.16 Z M28 98 L56 81.84 L56 49.51 L28 33.35 L0 49.51 L0 81.84 Z" fill="none" stroke="rgba(255, 179, 0, 0.05)" stroke-width="1"/></svg>');
             background-size: 56px 98px;
-            
             color: var(--text-color);
             margin: 0;
             padding: 40px 20px;
@@ -32,7 +28,6 @@
             box-sizing: border-box;
         }
 
-        /* Encabezado unificado idéntico en Dashboard */
         .header-container {
             display: flex;
             align-items: center;
@@ -56,69 +51,91 @@
             text-transform: uppercase;
         }
 
-        .grid {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 35px;
-            max-width: 1100px;
-            padding: 20px;
-        }
-
-        /* Celdas Hexagonales */
-        .card {
-            background: var(--card-bg);
-            width: 220px;
-            height: 250px;
-            position: relative;
+        /* 🔥 ESTRUCTURA DE COLUMNA VERTICAL */
+        .list-container {
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            border: 1px solid rgba(184, 134, 11, 0.2);
-            backdrop-filter: blur(10px);
-            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
-            transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
-            text-align: center;
+            gap: 20px;
+            width: 100%;
+            max-width: 750px;
             padding: 10px;
             box-sizing: border-box;
         }
 
-        .card:hover {
-            transform: translateY(-8px) scale(1.03);
-            border: 1px solid var(--cafe-dorado);
-            box-shadow: 0 0 25px var(--border-glow);
-            background: rgba(36, 36, 36, 0.95);
+        /* Fila de Sensor (Contenedor + Botones) */
+        .sensor-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--card-bg);
+            border: 2px solid var(--cafe-dorado);
+            border-radius: 15px;
+            padding: 15px 25px;
+            gap: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            transition: border-color 0.3s;
+        }
+        .sensor-row:hover {
+            border-color: var(--amarillo-miel);
+        }
+
+        /* Información Interna del Sensor */
+        .sensor-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            flex-grow: 1;
         }
 
         .label {
-            font-size: 0.75rem;
+            font-size: 0.8rem;
             color: var(--amarillo-miel);
             font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 1.5px;
-            margin-bottom: 8px;
-            z-index: 2;
+            margin-bottom: 4px;
         }
 
         .valor {
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: 800;
             color: #ffffff;
-            text-shadow: 0 2px 5px rgba(0,0,0,0.5);
-            z-index: 2;
         }
 
-        .alert-noise { color: #ff4444 !important; text-shadow: 0 0 10px rgba(255, 68, 68, 0.6); }
-        .status-quiet { color: #00ff88 !important; text-shadow: 0 0 10px rgba(0, 255, 136, 0.6); }
+        /* Grupo de botones de control */
+        .btn-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-btn {
+            background-color: transparent;
+            border: 1px solid var(--cafe-dorado);
+            color: #ffffff;
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:hover {
+            background-color: var(--amarillo-miel);
+            color: #111111;
+            border-color: var(--amarillo-miel);
+            transform: translateY(-2px);
+        }
+
+        .alert-noise { color: #ff4444 !important; }
+        .status-quiet { color: #00ff88 !important; }
         
         .btn-back {
             margin-top: 40px;
             background: transparent;
             color: #999;
             border: 1px solid #333;
-            padding: 8px 18px;
+            padding: 10px 22px;
             border-radius: 20px;
             cursor: pointer;
             font-weight: bold;
@@ -137,31 +154,63 @@
         <h1>Telemetría: Colmena 1</h1>
     </div>
 
-    <div class="grid">
-        <div class="card">
-            <div class="label">Población Activa</div>
-            <span id="abejas_val" class="valor">--</span>
+    <div class="list-container">
+        
+        <div class="sensor-row">
+            <div class="sensor-info">
+                <div class="label">Población Activa</div>
+                <span id="abejas_val" class="valor">--</span>
+            </div>
+            <div class="btn-group">
+                <button class="action-btn" onclick="window.location.href='grafica_poblacion.html'">Gráficas</button>
+                <button class="action-btn" onclick="window.location.href='tabla_poblacion.html'">Valor Histórico</button>
+            </div>
         </div>
 
-        <div class="card">
-            <div class="label">Temperatura</div>
-            <span id="temp_val" class="valor">-- °C</span>
+        <div class="sensor-row">
+            <div class="sensor-info">
+                <div class="label">Temperatura</div>
+                <span id="temp_val" class="valor">-- °C</span>
+            </div>
+            <div class="btn-group">
+                <button class="action-btn" onclick="window.location.href='grafica_temperatura.html'">Gráficas</button>
+                <button class="action-btn" onclick="window.location.href='tabla_temperatura.html'">Valor Histórico</button>
+            </div>
         </div>
 
-        <div class="card">
-            <div class="label">Humedad</div>
-            <span id="hum_val" class="valor">-- %</span>
+        <div class="sensor-row">
+            <div class="sensor-info">
+                <div class="label">Humedad</div>
+                <span id="hum_val" class="valor">-- %</span>
+            </div>
+            <div class="btn-group">
+                <button class="action-btn" onclick="window.location.href='grafica_humedad.html'">Gráficas</button>
+                <button class="action-btn" onclick="window.location.href='tabla_humedad.html'">Valor Histórico</button>
+            </div>
         </div>
 
-        <div class="card">
-            <div class="label">Peso Estimado</div>
-            <span id="peso_val" class="valor">-- g</span>
+        <div class="sensor-row">
+            <div class="sensor-info">
+                <div class="label">Peso Estimado</div>
+                <span id="peso_val" class="valor">-- g</span>
+            </div>
+            <div class="btn-group">
+                <button class="action-btn" onclick="window.location.href='grafica_peso.html'">Gráficas</button>
+                <button class="action-btn" onclick="window.location.href='tabla_peso.html'">Valor Histórico</button>
+            </div>
         </div>
 
-        <div class="card">
-            <div class="label">Estatus Ruido</div>
-            <span id="ruido_val" class="valor">--</span>
+        <div class="sensor-row">
+            <div class="sensor-info">
+                <div class="label">Estatus Ruido</div>
+                <span id="ruido_val" class="valor">--</span>
+            </div>
+            <div class="btn-group">
+                <button class="action-btn" onclick="window.location.href='grafica_ruido.html'">Gráficas</button>
+                <button class="action-btn" onclick="window.location.href='tabla_ruido.html'">Valor Histórico</button>
+            </div>
         </div>
+
     </div>
 
     <button id="backBtn" class="btn-back">⬅ Volver al Menú</button>
@@ -190,7 +239,7 @@
             else inicializarLecturaDatos();
         });
 
-        function initializeDatos() {
+        function inicializarLecturaDatos() {
             onValue(ref(db, 'colmena/cantidad_abejas'), (snapshot) => {
                 const data = snapshot.val();
                 document.getElementById("abejas_val").innerText = data !== null ? data + " 🐝" : "0 🐝";
