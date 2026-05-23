@@ -51,7 +51,6 @@
             text-transform: uppercase;
         }
 
-        /* 🔥 ESTRUCTURA DE COLUMNA VERTICAL */
         .list-container {
             display: flex;
             flex-direction: column;
@@ -62,7 +61,6 @@
             box-sizing: border-box;
         }
 
-        /* Fila de Sensor (Contenedor + Botones) */
         .sensor-row {
             display: flex;
             align-items: center;
@@ -79,7 +77,6 @@
             border-color: var(--amarillo-miel);
         }
 
-        /* Información Interna del Sensor */
         .sensor-info {
             display: flex;
             flex-direction: column;
@@ -102,7 +99,6 @@
             color: #ffffff;
         }
 
-        /* Grupo de botones de control */
         .btn-group {
             display: flex;
             gap: 12px;
@@ -162,8 +158,8 @@
                 <span id="abejas_val" class="valor">--</span>
             </div>
             <div class="btn-group">
-                <button class="action-btn" onclick="window.location.href='grafica_poblacion.html'">Gráficas</button>
-                <button class="action-btn" onclick="window.location.href='tabla_poblacion.html'">Valor Histórico</button>
+                <button class="action-btn" onclick="window.location.href='graficas.html?sensor=poblacion'">Gráficas</button>
+                <button class="action-btn" onclick="window.location.href='historico.html?sensor=poblacion'">Valor Histórico</button>
             </div>
         </div>
 
@@ -173,8 +169,8 @@
                 <span id="temp_val" class="valor">-- °C</span>
             </div>
             <div class="btn-group">
-                <button class="action-btn" onclick="window.location.href='grafica_temperatura.html'">Gráficas</button>
-                <button class="action-btn" onclick="window.location.href='tabla_temperatura.html'">Valor Histórico</button>
+                <button class="action-btn" onclick="window.location.href='graficas.html?sensor=temperatura'">Gráficas</button>
+                <button class="action-btn" onclick="window.location.href='historico.html?sensor=temperatura'">Valor Histórico</button>
             </div>
         </div>
 
@@ -184,8 +180,8 @@
                 <span id="hum_val" class="valor">-- %</span>
             </div>
             <div class="btn-group">
-                <button class="action-btn" onclick="window.location.href='grafica_humedad.html'">Gráficas</button>
-                <button class="action-btn" onclick="window.location.href='tabla_humedad.html'">Valor Histórico</button>
+                <button class="action-btn" onclick="window.location.href='graficas.html?sensor=humedad'">Gráficas</button>
+                <button class="action-btn" onclick="window.location.href='historico.html?sensor=humedad'">Valor Histórico</button>
             </div>
         </div>
 
@@ -195,8 +191,8 @@
                 <span id="peso_val" class="valor">-- g</span>
             </div>
             <div class="btn-group">
-                <button class="action-btn" onclick="window.location.href='grafica_peso.html'">Gráficas</button>
-                <button class="action-btn" onclick="window.location.href='tabla_peso.html'">Valor Histórico</button>
+                <button class="action-btn" onclick="window.location.href='graficas.html?sensor=peso'">Gráficas</button>
+                <button class="action-btn" onclick="window.location.href='historico.html?sensor=peso'">Valor Histórico</button>
             </div>
         </div>
 
@@ -206,8 +202,8 @@
                 <span id="ruido_val" class="valor">--</span>
             </div>
             <div class="btn-group">
-                <button class="action-btn" onclick="window.location.href='grafica_ruido.html'">Gráficas</button>
-                <button class="action-btn" onclick="window.location.href='tabla_ruido.html'">Valor Histórico</button>
+                <button class="action-btn" onclick="window.location.href='graficas.html?sensor=ruido'">Gráficas</button>
+                <button class="action-btn" onclick="window.location.href='historico.html?sensor=ruido'">Valor Histórico</button>
             </div>
         </div>
 
