@@ -7,75 +7,34 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
-            --bg-color: #0f0f0f;
-            --amarillo-miel: #ffb300;
-            --cafe-dorado: #b8860b;
-            --text-color: #e0e0e0;
+            --bg-color: #0f0f0f; --card-bg: rgba(26, 26, 26, 0.95); 
+            --amarillo-miel: #ffb300; --cafe-dorado: #b8860b; --text-color: #e0e0e0;
         }
-
         body {
-            font-family: 'Segoe UI', Roboto, sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            margin: 0;
-            padding: 40px 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            font-family: 'Segoe UI', Roboto, sans-serif; background-color: var(--bg-color); color: var(--text-color);
+            margin: 0; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh;
         }
-
-        h1 {
-            color: var(--amarillo-miel);
-            text-shadow: 0 0 15px rgba(255, 179, 0, 0.4);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .chart-container {
-            width: 90%;
-            max-width: 800px;
-            background: rgba(26, 26, 26, 0.95);
-            border: 2px solid var(--cafe-dorado);
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            margin-top: 20px;
-        }
-
-        .btn-back {
-            margin-top: 30px;
-            background: transparent;
-            color: var(--text-color);
-            border: 1px solid var(--cafe-dorado);
-            padding: 10px 22px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-
-        .btn-back:hover {
-            color: #0f0f0f;
-            background-color: var(--amarillo-miel);
-            border-color: var(--amarillo-miel);
-        }
+        h1 { color: var(--amarillo-miel); text-transform: uppercase; letter-spacing: 2px; }
+        .chart-container { width: 100%; max-width: 900px; background: var(--card-bg); border: 2px solid var(--cafe-dorado); border-radius: 15px; padding: 20px; }
+        .btn-back { margin-top: 30px; background: transparent; color: #999; border: 1px solid #333; padding: 10px 22px; border-radius: 20px; cursor: pointer; transition: all 0.3s; }
+        .btn-back:hover { color: var(--amarillo-miel); border-color: var(--amarillo-miel); }
     </style>
 </head>
 <body>
 
-    <h1 id="titulo-sensor">Gráfica de Sensor</h1>
+    <h1 id="titulo-graf">Evolución de Datos</h1>
     
     <div class="chart-container">
-        <canvas id="sensorChart"></canvas>
+        <canvas id="miGrafica"></canvas>
     </div>
 
-    <button class="btn-back" onclick="window.location.href='dashboard.html'">⬅ Volver al Dashboard</button>
+    <button onclick="window.location.href='dashboard.html'" class="btn-back">⬅ Volver al Dashboard</button>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // Configuración de Firebase
+        // Parámetros de Firebase extraídos de datos.txt
         const firebaseConfig = {
             apiKey: "AIzaSyBwKBot_swtev-g7OxwFP9Jk_q2EGsAPnA",
             authDomain: "colmenainteligente-ee7a8.firebaseapp.com",
@@ -89,61 +48,67 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Obtener el sensor de la URL
-        const params = new URLSearchParams(window.location.search);
-        const sensor = params.get('sensor');
-        
-        document.getElementById('titulo-sensor').innerText = `Gráfica: ${sensor.toUpperCase()}`;
+        // Identificar qué gráfica mostrar
+        const urlParams = new URLSearchParams(window.location.search);
+        const sensorName = urlParams.get('sensor');
+        document.getElementById('titulo-graf').innerText = `Gráfica: ${sensorName.toUpperCase()}`;
 
-        // Mapear el nombre del sensor a la ruta de Firebase
-        let firebasePath = `colmena/${sensor}`;
-        if(sensor === 'poblacion') firebasePath = 'colmena/cantidad_abejas';
+        let chartInstancia = null;
 
-        const ctx = document.getElementById('sensorChart').getContext('2d');
-        const sensorChart = new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: [], 
-                datasets: [{
-                    label: `Lecturas de ${sensor}`,
-                    data: [],
-                    borderColor: '#ffb300', // Amarillo miel
-                    backgroundColor: 'rgba(255, 179, 0, 0.2)',
-                    borderWidth: 2,
-                    pointBackgroundColor: '#b8860b' // Café dorado
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    x: { ticks: { color: '#e0e0e0' } },
-                    y: { ticks: { color: '#e0e0e0' } }
-                },
-                plugins: {
-                    legend: { labels: { color: '#e0e0e0' } }
-                }
-            }
-        });
-
-        // Escuchar datos en tiempo real
-        onValue(ref(db, firebasePath), (snapshot) => {
+        onValue(ref(db, 'colmena_historico'), (snapshot) => {
             const data = snapshot.val();
-            const now = new Date().toLocaleTimeString();
+            if(!data) return;
+
+            // Ordenar datos cronológicamente (más antiguo primero para la gráfica)
+            const registros = Object.values(data).sort((a, b) => a.timestamp - b.timestamp);
             
-            let valorPlot = data;
-            if (sensor === 'poblacion') {
-                valorPlot = parseInt(data, 10); // Asegurar que sea número entero
-            }
+            const etiquetas = [];
+            const valores = [];
 
-            if (sensorChart.data.labels.length > 10) {
-                sensorChart.data.labels.shift();
-                sensorChart.data.datasets[0].data.shift();
-            }
+            registros.forEach(registro => {
+                if(registro[sensorName] !== undefined) {
+                    // Formato de hora corto para la gráfica
+                    const hora = new Date(registro.timestamp).toLocaleTimeString('es-MX', {hour: '2-digit', minute:'2-digit'});
+                    etiquetas.push(hora);
+                    
+                    // El sensor de ruido arroja booleanos, lo convertimos a 1 y 0 para graficar
+                    valores.push(sensorName === 'ruido' ? (registro[sensorName] ? 1 : 0) : registro[sensorName]);
+                }
+            });
 
-            sensorChart.data.labels.push(now);
-            sensorChart.data.datasets[0].data.push(valorPlot);
-            sensorChart.update();
+            dibujarGrafica(etiquetas, valores, sensorName);
         });
+
+        function dibujarGrafica(labels, data, sensor) {
+            const ctx = document.getElementById('miGrafica').getContext('2d');
+            
+            // Destruir gráfica previa si existe para actualizarla en vivo
+            if(chartInstancia) { chartInstancia.destroy(); }
+
+            chartInstancia = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: `Niveles de ${sensor.toUpperCase()}`,
+                        data: data,
+                        borderColor: '#ffb300',
+                        backgroundColor: 'rgba(255, 179, 0, 0.2)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4 // Curva suavizada
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { labels: { color: '#e0e0e0' } } },
+                    scales: {
+                        x: { ticks: { color: '#b8860b' }, grid: { color: 'rgba(255,255,255,0.1)' } },
+                        y: { ticks: { color: '#b8860b' }, grid: { color: 'rgba(255,255,255,0.1)' } }
+                    }
+                }
+            });
+        }
     </script>
 </body>
 </html>
