@@ -46,7 +46,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // Parámetros de Firebase basados en el documento datos.txt
         const firebaseConfig = {
             apiKey: "AIzaSyBwKBot_swtev-g7OxwFP9Jk_q2EGsAPnA",
             authDomain: "colmenainteligente-ee7a8.firebaseapp.com",
@@ -60,7 +59,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Obtener el sensor desde la URL (ej: historico.html?sensor=temperatura)
         const urlParams = new URLSearchParams(window.location.search);
         const sensorName = urlParams.get('sensor');
         
@@ -72,14 +70,15 @@
             tbody.innerHTML = "";
 
             if (data) {
-                // Convertir objeto de Firebase a Array y ordenar por fecha descendente
                 const registros = Object.values(data).sort((a, b) => b.timestamp - a.timestamp);
                 
                 registros.forEach(registro => {
+                    // FILTRO DE SEGURIDAD PARA "INVALID DATE"
+                    if (!registro.timestamp || typeof registro.timestamp !== 'number') return;
+
                     const fecha = new Date(registro.timestamp).toLocaleString('es-MX');
                     let valor = registro[sensorName] !== undefined ? registro[sensorName] : "N/D";
                     
-                    // Añadir unidades visuales
                     if(sensorName === 'temperatura') valor += " °C";
                     if(sensorName === 'humedad') valor += " %";
                     if(sensorName === 'peso') valor += " g";
