@@ -34,7 +34,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // Parámetros de Firebase extraídos de datos.txt
         const firebaseConfig = {
             apiKey: "AIzaSyBwKBot_swtev-g7OxwFP9Jk_q2EGsAPnA",
             authDomain: "colmenainteligente-ee7a8.firebaseapp.com",
@@ -48,7 +47,6 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Identificar qué gráfica mostrar
         const urlParams = new URLSearchParams(window.location.search);
         const sensorName = urlParams.get('sensor');
         document.getElementById('titulo-graf').innerText = `Gráfica: ${sensorName.toUpperCase()}`;
@@ -59,19 +57,19 @@
             const data = snapshot.val();
             if(!data) return;
 
-            // Ordenar datos cronológicamente (más antiguo primero para la gráfica)
             const registros = Object.values(data).sort((a, b) => a.timestamp - b.timestamp);
             
             const etiquetas = [];
             const valores = [];
 
             registros.forEach(registro => {
+                // FILTRO DE SEGURIDAD PARA "INVALID DATE"
+                if (!registro.timestamp || typeof registro.timestamp !== 'number') return;
+
                 if(registro[sensorName] !== undefined) {
-                    // Formato de hora corto para la gráfica
                     const hora = new Date(registro.timestamp).toLocaleTimeString('es-MX', {hour: '2-digit', minute:'2-digit'});
                     etiquetas.push(hora);
                     
-                    // El sensor de ruido arroja booleanos, lo convertimos a 1 y 0 para graficar
                     valores.push(sensorName === 'ruido' ? (registro[sensorName] ? 1 : 0) : registro[sensorName]);
                 }
             });
@@ -82,7 +80,6 @@
         function dibujarGrafica(labels, data, sensor) {
             const ctx = document.getElementById('miGrafica').getContext('2d');
             
-            // Destruir gráfica previa si existe para actualizarla en vivo
             if(chartInstancia) { chartInstancia.destroy(); }
 
             chartInstancia = new Chart(ctx, {
@@ -96,7 +93,7 @@
                         backgroundColor: 'rgba(255, 179, 0, 0.2)',
                         borderWidth: 2,
                         fill: true,
-                        tension: 0.4 // Curva suavizada
+                        tension: 0.4 
                     }]
                 },
                 options: {
