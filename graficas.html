@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gráficas - Colmena Inteligente</title>
+    <link rel="icon" type="image/png" href="logo.png">
+    
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -14,8 +16,22 @@
             font-family: 'Segoe UI', Roboto, sans-serif; background-color: var(--bg-color); color: var(--text-color);
             margin: 0; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh;
         }
-        h1 { color: var(--amarillo-miel); text-transform: uppercase; letter-spacing: 2px; }
-        .chart-container { width: 100%; max-width: 900px; background: var(--card-bg); border: 2px solid var(--cafe-dorado); border-radius: 15px; padding: 20px; }
+        h1 { color: var(--amarillo-miel); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 10px;}
+        
+        .chart-container { width: 100%; max-width: 900px; background: var(--card-bg); border: 2px solid var(--cafe-dorado); border-radius: 15px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        
+        /* Controles de filtro */
+        .filter-controls {
+            margin-top: 20px; display: flex; align-items: center; gap: 20px;
+        }
+        .filter-btn {
+            background: var(--card-bg); border: 2px solid var(--cafe-dorado); color: var(--amarillo-miel);
+            width: 45px; height: 45px; border-radius: 50%; font-size: 1.5rem; font-weight: bold;
+            cursor: pointer; transition: all 0.3s; display: flex; align-items: center; justify-content: center;
+        }
+        .filter-btn:hover { background: var(--amarillo-miel); color: #000; border-color: var(--amarillo-miel); transform: scale(1.1); }
+        #filtro-label { font-weight: bold; color: #fff; font-size: 1.2rem; min-width: 100px; text-align: center; text-transform: uppercase; letter-spacing: 1px; }
+
         .btn-back { margin-top: 30px; background: transparent; color: #999; border: 1px solid #333; padding: 10px 22px; border-radius: 20px; cursor: pointer; transition: all 0.3s; }
         .btn-back:hover { color: var(--amarillo-miel); border-color: var(--amarillo-miel); }
     </style>
@@ -28,7 +44,13 @@
         <canvas id="miGrafica"></canvas>
     </div>
 
-    <button onclick="window.location.href='dashboard.html'" class="btn-back">⬅ Volver menu de datos</button>
+    <div class="filter-controls">
+        <button class="filter-btn" id="btn-menos">-</button>
+        <span id="filtro-label">Día</span>
+        <button class="filter-btn" id="btn-mas">+</button>
+    </div>
+
+    <button onclick="window.location.href='dashboard.html'" class="btn-back">⬅ Volver al menu de datos</button>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
@@ -51,60 +73,95 @@
         const sensorName = urlParams.get('sensor');
         document.getElementById('titulo-graf').innerText = `Gráfica: ${sensorName.toUpperCase()}`;
 
+        // LÓGICA DE FILTROS
+        const filtros = ["dia", "semana", "mes"];
+        let filtroActualIdx = 0; // Empieza en "dia"
+        let datosOriginales = [];
         let chartInstancia = null;
+
+        const msPorDia = 24 * 60 * 60 * 1000;
+        const tiempos = { "dia": msPorDia, "semana": msPorDia * 7, "mes": msPorDia * 30 };
 
         onValue(ref(db, 'colmena_historico'), (snapshot) => {
             const data = snapshot.val();
             if(!data) return;
+            datosOriginales = Object.values(data);
+            actualizarGrafica();
+        });
 
-            const registros = Object.values(data).sort((a, b) => a.timestamp - b.timestamp);
+        function actualizarGrafica() {
+            const ahora = Date.now();
+            const tiempoLimite = ahora - tiempos[filtros[filtroActualIdx]];
             
+            // Filtrar registros por tiempo y por validez de fecha
+            const registrosFiltrados = datosOriginales.filter(reg => 
+                reg.timestamp && 
+                typeof reg.timestamp === 'number' && 
+                reg.timestamp >= tiempoLimite
+            ).sort((a, b) => a.timestamp - b.timestamp);
+
             const etiquetas = [];
             const valores = [];
 
-            registros.forEach(registro => {
-                // FILTRO DE SEGURIDAD PARA "INVALID DATE"
-                if (!registro.timestamp || typeof registro.timestamp !== 'number') return;
-
-                if(registro[sensorName] !== undefined) {
-                    const hora = new Date(registro.timestamp).toLocaleTimeString('es-MX', {hour: '2-digit', minute:'2-digit'});
-                    etiquetas.push(hora);
+            registrosFiltrados.forEach(reg => {
+                if(reg[sensorName] !== undefined) {
+                    const fechaObj = new Date(reg.timestamp);
+                    // Si es "día" mostrar hora, si es "mes/semana" mostrar fecha corta
+                    const label = filtroActualIdx === 0 
+                        ? fechaObj.toLocaleTimeString('es-MX', {hour: '2-digit', minute:'2-digit'})
+                        : fechaObj.toLocaleDateString('es-MX', {day: '2-digit', month:'short'});
                     
-                    valores.push(sensorName === 'ruido' ? (registro[sensorName] ? 1 : 0) : registro[sensorName]);
+                    etiquetas.push(label);
+                    valores.push(sensorName === 'ruido' ? (reg[sensorName] ? 1 : 0) : reg[sensorName]);
                 }
             });
 
-            dibujarGrafica(etiquetas, valores, sensorName);
-        });
+            dibujarCanvas(etiquetas, valores);
+        }
 
-        function dibujarGrafica(labels, data, sensor) {
+        function dibujarCanvas(labels, data) {
             const ctx = document.getElementById('miGrafica').getContext('2d');
-            
-            if(chartInstancia) { chartInstancia.destroy(); }
+            if(chartInstancia) chartInstancia.destroy();
 
             chartInstancia = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
                     datasets: [{
-                        label: `Niveles de ${sensor.toUpperCase()}`,
+                        label: `Niveles de ${sensorName.toUpperCase()}`,
                         data: data,
                         borderColor: '#ffb300',
                         backgroundColor: 'rgba(255, 179, 0, 0.2)',
-                        borderWidth: 2,
+                        borderWidth: 3,
                         fill: true,
-                        tension: 0.4 
+                        tension: 0.3 
                     }]
                 },
                 options: {
                     responsive: true,
-                    plugins: { legend: { labels: { color: '#e0e0e0' } } },
                     scales: {
-                        x: { ticks: { color: '#b8860b' }, grid: { color: 'rgba(255,255,255,0.1)' } },
-                        y: { ticks: { color: '#b8860b' }, grid: { color: 'rgba(255,255,255,0.1)' } }
-                    }
+                        x: { ticks: { color: '#b8860b' }, grid: { color: 'rgba(255,255,255,0.05)' } },
+                        y: { ticks: { color: '#b8860b' }, grid: { color: 'rgba(255,255,255,0.05)' } }
+                    },
+                    plugins: { legend: { labels: { color: '#fff' } } }
                 }
             });
+        }
+
+        // Eventos de botones + y -
+        document.getElementById('btn-mas').addEventListener('click', () => {
+            if(filtroActualIdx < filtros.length - 1) filtroActualIdx++;
+            actualizarUI();
+        });
+
+        document.getElementById('btn-menos').addEventListener('click', () => {
+            if(filtroActualIdx > 0) filtroActualIdx--;
+            actualizarUI();
+        });
+
+        function actualizarUI() {
+            document.getElementById('filtro-label').innerText = filtros[filtroActualIdx];
+            actualizarGrafica();
         }
     </script>
 </body>
