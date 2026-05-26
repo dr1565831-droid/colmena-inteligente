@@ -5,22 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Histórico - Colmena Inteligente</title>
     <link rel="icon" type="image/png" href="logo.png">
-    
+    <script>
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.add('light-mode');
+        }
+    </script>
     <style>
         :root {
             --bg-color: #0f0f0f; --card-bg: rgba(26, 26, 26, 0.95); 
             --amarillo-miel: #ffb300; --cafe-dorado: #b8860b; --text-color: #e0e0e0;
         }
+        :root.light-mode {
+            --bg-color: #f5f5f5; --card-bg: rgba(255, 255, 255, 0.95);
+            --amarillo-miel: #d68900; --cafe-dorado: #a87b00; --text-color: #222222;
+        }
         body {
             font-family: 'Segoe UI', Roboto, sans-serif; background-color: var(--bg-color); color: var(--text-color);
             margin: 0; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh;
+            transition: background-color 0.3s, color 0.3s;
         }
         h1 { color: var(--amarillo-miel); text-transform: uppercase; letter-spacing: 2px; }
-        .table-container { width: 100%; max-width: 800px; background: var(--card-bg); border: 2px solid var(--cafe-dorado); border-radius: 15px; padding: 20px; overflow-x: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .table-container { width: 100%; max-width: 800px; background: var(--card-bg); border: 2px solid var(--cafe-dorado); border-radius: 15px; padding: 20px; overflow-x: auto; box-shadow: 0 10px 30px rgba(0,0,0,0.2); transition: background-color 0.3s, border-color 0.3s; }
         table { width: 100%; border-collapse: collapse; text-align: left; }
         th, td { padding: 12px; border-bottom: 1px solid #333; }
+        :root.light-mode th, :root.light-mode td { border-bottom: 1px solid #ccc; }
         th { color: var(--amarillo-miel); font-weight: bold; }
-        .btn-back { margin-top: 30px; background: transparent; color: #999; border: 1px solid #333; padding: 10px 22px; border-radius: 20px; cursor: pointer; transition: all 0.3s; }
+        .btn-back { margin-top: 30px; background: transparent; color: var(--text-color); border: 1px solid var(--cafe-dorado); padding: 10px 22px; border-radius: 20px; cursor: pointer; transition: all 0.3s; }
         .btn-back:hover { color: var(--amarillo-miel); border-color: var(--amarillo-miel); }
     </style>
 </head>
