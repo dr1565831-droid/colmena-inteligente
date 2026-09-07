@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <link rel="icon" type="image/png" href="logo.png">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productos - Colmena Inteligente</title>
+    <script>
+        if (localStorage.getItem('theme') === 'light') { document.documentElement.classList.add('light-mode'); }
+    </script>
+    <style>
+        /* (Se repiten las variables y estilos base de index.html por practicidad en este formato) */
+        :root {
+            --bg-color: #0f0f0f; --amarillo-miel: #ffb300; --cafe-dorado: #b8860b;
+            --card-bg: rgba(26, 26, 26, 0.9); --text-color: #e0e0e0;
+        }
+        :root.light-mode {
+            --bg-color: #f5f5f5; --amarillo-miel: #d68900; --cafe-dorado: #a87b00;
+            --card-bg: rgba(255, 255, 255, 0.95); --text-color: #222222;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Roboto, sans-serif; background-color: var(--bg-color); 
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="98" viewBox="0 0 56 98"><path d="M28 0 L56 16.16 L56 48.49 L28 64.65 L0 48.49 L0 16.16 Z M28 98 L56 81.84 L56 49.51 L28 33.35 L0 49.51 L0 81.84 Z" fill="none" stroke="rgba(184, 134, 11, 0.15)" stroke-width="1"/></svg>');
+            color: var(--text-color); margin: 0; transition: background-color 0.3s, color 0.3s;
+        }
+
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 15px 30px; background: var(--card-bg); border-bottom: 2px solid var(--cafe-dorado); position: sticky; top: 0; z-index: 1000;}
+        .icon-btn { background: transparent; border: none; color: var(--text-color); font-size: 1.8rem; cursor: pointer; transition: color 0.3s; }
+        .icon-btn:hover { color: var(--amarillo-miel); }
+        .nav-center { display: flex; align-items: center; gap: 15px; }
+        .nav-center img { width: 50px; height: 50px; object-fit: contain; }
+        .brand-titles h1 { margin: 0; color: var(--amarillo-miel); font-size: 1.8rem; letter-spacing: 2px; }
+        .brand-titles span { font-size: 0.8rem; color: var(--text-color); }
+
+        .container { max-width: 900px; margin: 40px auto; padding: 0 20px; }
+        
+        .product-card {
+            display: flex; background: var(--card-bg); border: 2px solid var(--cafe-dorado); 
+            border-radius: 20px; padding: 40px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); gap: 40px; align-items: flex-start;
+        }
+        
+        .product-media { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 15px; }
+        .product-img { width: 100%; min-height: 250px; background: rgba(0,0,0,0.2); border: 2px dashed var(--cafe-dorado); border-radius: 15px; display: flex; align-items: center; justify-content: center; color: #888; }
+        .product-title { color: var(--amarillo-miel); font-size: 1.5rem; font-weight: bold; margin: 0; text-align: center; }
+
+        .product-details { flex: 1.5; font-size: 1.1rem; line-height: 1.6; }
+        .product-details h2 { color: var(--amarillo-miel); margin-top: 0; }
+        
+        @media (max-width: 768px) { .product-card { flex-direction: column; } }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-left">
+            <button class="icon-btn" onclick="window.location.href='index.html'">⬅ Volver</button>
+        </div>
+        <div class="nav-center">
+            <img src="logo.png" alt="Logo">
+            <div class="brand-titles">
+                <h1>ABJ</h1><span>sistema de monitoreo inteligente</span>
+            </div>
+        </div>
+        <div class="nav-right" style="width:50px;"></div> </nav>
+
+    <div class="container">
+        <div class="product-card">
+            <div class="product-media">
+                <div class="product-img">[ Espacio para Imagen del Kit ]</div>
+                <h3 class="product-title">KIT DE SENSORES ABJ</h3>
+            </div>
+            <div class="product-details">
+                <h2>Descripción del Producto</h2>
+                <p>[ Aquí va la descripción completa del kit de sensores. Explica qué incluye (sensor de temperatura, humedad, peso, micrófono, etc.) y cómo ayuda al apicultor a gestionar la salud de la colmena. ]</p>
+                <button class="icon-btn" style="border: 1px solid var(--cafe-dorado); padding: 10px 20px; border-radius: 10px; font-size: 1rem; margin-top: 20px;" onclick="window.location.href='index.html'">Comprar Ahora (Próximamente)</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
