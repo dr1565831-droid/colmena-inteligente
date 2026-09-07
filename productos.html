@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Productos - ABJ</title>
+    <style>
+        body { font-family: sans-serif; background: #f9f9f9; padding: 40px; margin: 0; }
+        .nav-back { text-decoration: none; color: #4CAF50; font-weight: bold; display: block; margin-bottom: 30px; }
+        .producto-container { display: flex; max-width: 900px; margin: auto; background: white; padding: 40px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); gap: 40px; align-items: flex-start; }
+        .producto-izq { flex: 1; text-align: center; }
+        .producto-izq h3 { margin-top: 15px; color: #333; }
+        .imagen-prod { width: 100%; height: 300px; background: #e0e0e0; display: flex; justify-content: center; align-items: center; color: #888; border-radius: 10px; }
+        .producto-der { flex: 1; }
+        .producto-der h2 { color: #4CAF50; margin-top: 0; }
+        .descripcion { line-height: 1.6; color: #555; }
+    </style>
+</head>
+<body>
+    <a href="index.html" class="nav-back">← Volver al Inicio</a>
+    
+    <div class="producto-container">
+        <div class="producto-izq">
+            <div class="imagen-prod">Espacio para Imagen</div>
+            <h3>KIT DE SENSORES ABJ</h3>
+        </div>
+        <div class="producto-der">
+            <h2>Descripción del Producto</h2>
+            <div class="descripcion">
+                <p>Aquí va todo el texto descriptivo de los sensores ABJ. Puedes detallar los componentes incluidos:</p>
+                <ul>
+                    <li>Placa ESP32 preconfigurada.</li>
+                    <li>Sensores infrarrojos para conteo bidireccional.</li>
+                    <li>Sensor de temperatura y humedad DHT11.</li>
+                    <li>Módulo de peso HX711.</li>
+                    <li>Micrófono para detección de alteraciones.</li>
+                </ul>
+                <p>Incluye acceso a la plataforma web para monitoreo en tiempo real y almacenamiento de historial en la nube.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
