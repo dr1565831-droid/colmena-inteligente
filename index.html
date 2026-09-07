@@ -1,99 +1,164 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <link rel="icon" type="image/png" href="logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ABJ - Inicio</title>
+    <title>Inicio - Colmena Inteligente</title>
+    <script>
+        if (localStorage.getItem('theme') === 'light') { document.documentElement.classList.add('light-mode'); }
+    </script>
     <style>
-        body { font-family: sans-serif; margin: 0; padding: 0; background-color: #f9f9f9; color: #333; }
-        
+        :root {
+            --bg-color: #0f0f0f; --amarillo-miel: #ffb300; --cafe-dorado: #b8860b;
+            --card-bg: rgba(26, 26, 26, 0.9); --text-color: #e0e0e0;
+        }
+        :root.light-mode {
+            --bg-color: #f5f5f5; --amarillo-miel: #d68900; --cafe-dorado: #a87b00;
+            --card-bg: rgba(255, 255, 255, 0.95); --text-color: #222222;
+        }
+
+        body { 
+            font-family: 'Segoe UI', Roboto, sans-serif; background-color: var(--bg-color); 
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="98" viewBox="0 0 56 98"><path d="M28 0 L56 16.16 L56 48.49 L28 64.65 L0 48.49 L0 16.16 Z M28 98 L56 81.84 L56 49.51 L28 33.35 L0 49.51 L0 81.84 Z" fill="none" stroke="rgba(184, 134, 11, 0.15)" stroke-width="1"/></svg>');
+            color: var(--text-color); margin: 0; transition: background-color 0.3s, color 0.3s;
+        }
+
         /* Navbar */
-        .navbar { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 15px 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: relative; }
-        .nav-btn { background: none; border: none; font-size: 24px; cursor: pointer; }
-        
-        /* Logo Central */
-        .centro-header { display: flex; align-items: center; gap: 15px; text-align: left; }
-        .logo-placeholder { width: 50px; height: 50px; background: #ddd; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 10px; color: #888; }
-        .marca h1 { margin: 0; font-size: 24px; color: #4CAF50; }
-        .marca p { margin: 0; font-size: 12px; color: #666; }
+        .navbar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 15px 30px; background: var(--card-bg); border-bottom: 2px solid var(--cafe-dorado);
+            position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .nav-left, .nav-right { position: relative; }
+
+        .icon-btn {
+            background: transparent; border: none; color: var(--text-color);
+            font-size: 1.8rem; cursor: pointer; transition: color 0.3s;
+        }
+        .icon-btn:hover { color: var(--amarillo-miel); }
+
+        .nav-center { display: flex; align-items: center; gap: 15px; text-align: left; }
+        .nav-center img { width: 50px; height: 50px; object-fit: contain; }
+        .brand-titles h1 { margin: 0; color: var(--amarillo-miel); font-size: 1.8rem; letter-spacing: 2px; }
+        .brand-titles span { font-size: 0.8rem; color: var(--text-color); }
 
         /* Menús Desplegables */
-        .dropdown { display: none; position: absolute; top: 70px; background: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-radius: 5px; flex-direction: column; width: 180px; z-index: 100; }
-        .dropdown a { padding: 12px 20px; text-decoration: none; color: #333; border-bottom: 1px solid #eee; }
-        .dropdown a:hover { background: #f0f0f0; }
-        #menu-izq { left: 30px; }
-        #menu-der { right: 30px; }
+        .dropdown {
+            position: absolute; top: 50px; background: var(--card-bg); border: 1px solid var(--cafe-dorado);
+            border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); padding: 10px 0;
+            display: none; flex-direction: column; min-width: 150px;
+        }
+        .nav-left .dropdown { left: 0; }
+        .nav-right .dropdown { right: 0; }
+        .dropdown.show { display: flex; }
+        .dropdown a {
+            color: var(--text-color); text-decoration: none; padding: 10px 20px;
+            font-weight: bold; transition: background 0.2s;
+        }
+        .dropdown a:hover { background: var(--amarillo-miel); color: #000; }
 
-        /* Secciones */
-        .seccion { display: flex; justify-content: space-between; align-items: center; padding: 50px; max-width: 1000px; margin: 20px auto; background: white; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); gap: 40px; }
-        .texto-seccion { flex: 1; }
-        .texto-seccion h2 { color: #4CAF50; }
-        .imagen-placeholder { flex: 1; height: 250px; background: #e0e0e0; display: flex; justify-content: center; align-items: center; color: #888; border-radius: 10px; }
-        .btn-accion { display: inline-block; margin-top: 15px; padding: 10px 20px; background: #4CAF50; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; }
+        /* Contenido */
+        .container { max-width: 900px; margin: 40px auto; padding: 0 20px; display: flex; flex-direction: column; gap: 40px; }
+        
+        .section-card {
+            display: flex; align-items: center; background: var(--card-bg);
+            border: 2px solid var(--cafe-dorado); border-radius: 20px; padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2); gap: 30px;
+        }
+        .section-text { flex: 1; }
+        .section-text h2 { color: var(--amarillo-miel); margin-top: 0; }
+        .section-img {
+            flex: 1; min-height: 200px; background: rgba(0,0,0,0.2);
+            border: 2px dashed var(--cafe-dorado); border-radius: 15px;
+            display: flex; align-items: center; justify-content: center; color: #888;
+        }
+
+        .btn-primary {
+            display: inline-block; background: transparent; color: var(--text-color);
+            border: 2px solid var(--cafe-dorado); padding: 10px 20px; border-radius: 20px;
+            text-decoration: none; font-weight: bold; transition: all 0.3s; margin-top: 15px;
+        }
+        .btn-primary:hover { background: var(--amarillo-miel); color: #000; border-color: var(--amarillo-miel); }
+        
+        @media (max-width: 768px) {
+            .section-card { flex-direction: column; }
+        }
     </style>
 </head>
 <body>
 
-    <!-- Encabezado -->
-    <header class="navbar">
-        <button class="nav-btn" onclick="toggleMenu('menu-izq')">☰</button>
-        <div id="menu-izq" class="dropdown">
-            <a href="index.html">Inicio</a>
-            <a href="productos.html">Productos</a>
-            <a href="#">Ayuda</a>
-        </div>
-
-        <div class="centro-header">
-            <div class="logo-placeholder">LOGO</div>
-            <div class="marca">
-                <h1>ABJ</h1>
-                <p>sistema de monitoreo inteligente</p>
+    <nav class="navbar">
+        <div class="nav-left">
+            <button class="icon-btn" id="menuBtn">☰</button>
+            <div id="mainMenu" class="dropdown">
+                <a href="index.html">Inicio</a>
+                <a href="productos.html">Productos</a>
+                <a href="#ayuda">Ayuda</a>
             </div>
         </div>
-
-        <button class="nav-btn" onclick="toggleMenu('menu-der')">👤</button>
-        <div id="menu-der" class="dropdown">
-            <a href="login.html">Iniciar Sesión</a>
-            <a href="login.html">Crear Cuenta</a>
-            <a href="dashboard_colmena.html">Ejemplo (Colmena 1)</a>
+        <div class="nav-center">
+            <img src="logo.png" alt="Logo">
+            <div class="brand-titles">
+                <h1>ABJ</h1>
+                <span>sistema de monitoreo inteligente</span>
+            </div>
         </div>
-    </header>
-
-    <!-- Sección 1: KITS -->
-    <section class="seccion">
-        <div class="texto-seccion">
-            <h2>KITS ABJ</h2>
-            <p>Descubre nuestra tecnología diseñada para optimizar el cuidado de tus abejas. Monitoreo en tiempo real para apicultores modernos.</p>
-            <a href="productos.html" class="btn-accion">Ver Productos</a>
+        <div class="nav-right">
+            <button class="icon-btn" id="userBtn">👤</button>
+            <div id="userMenu" class="dropdown">
+                <a href="login.html">Iniciar Sesión</a>
+                <a href="registro.html">Crear Cuenta</a>
+                <a href="#" id="demoBtn">Ejemplo</a>
+            </div>
         </div>
-        <div class="imagen-placeholder">Espacio para Imagen Kit</div>
-    </section>
+    </nav>
 
-    <!-- Sección 2: Empezar -->
-    <section class="seccion">
-        <div class="texto-seccion">
-            <h2>EMPEZAR ES FACIL</h2>
-            <p>Instala los sensores en tu colmena, conecta el sistema a tu red y comienza a recibir datos inmediatamente en tu panel de control.</p>
+    <div class="container">
+        <div class="section-card">
+            <div class="section-text">
+                <h2>KITS ABJ</h2>
+                <p>Nuestros kits de monitoreo están diseñados para brindarte la información más precisa sobre el estado de tu colmena. Todo desde la palma de tu mano.</p>
+                <a href="productos.html" class="btn-primary">Ver Productos</a>
+            </div>
+            <div class="section-img">[ Espacio para Imagen ]</div>
         </div>
-        <div class="imagen-placeholder">Espacio para Imagen Empezar</div>
-    </section>
 
-    <!-- Sección 3: Quienes Somos -->
-    <section class="seccion">
-        <div class="texto-seccion">
-            <h2>QUIENES SOMOS</h2>
-            <p>Somos un equipo comprometido con la preservación de las abejas y la modernización de la apicultura mediante tecnología accesible y confiable.</p>
+        <div class="section-card">
+            <div class="section-text">
+                <h2>EMPEZAR ES FÁCIL</h2>
+                <p>Instala los sensores en tu colmena en cuestión de minutos, conéctalos a la red y comienza a recibir datos en tiempo real de temperatura, humedad y más.</p>
+            </div>
+            <div class="section-img">[ Espacio para Imagen ]</div>
         </div>
-        <div class="imagen-placeholder">Espacio para Imagen Equipo</div>
-    </section>
+
+        <div class="section-card">
+            <div class="section-text">
+                <h2>QUIÉNES SOMOS</h2>
+                <p>Somos un equipo comprometido con la preservación de las abejas y la innovación agrícola, integrando tecnología IoT para un futuro sustentable.</p>
+            </div>
+            <div class="section-img">[ Espacio para Imagen ]</div>
+        </div>
+    </div>
 
     <script>
-        function toggleMenu(id) {
-            document.getElementById('menu-izq').style.display = 'none';
-            document.getElementById('menu-der').style.display = 'none';
-            const menu = document.getElementById(id);
-            menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
-        }
+        // Lógica de menús
+        const menuBtn = document.getElementById('menuBtn');
+        const mainMenu = document.getElementById('mainMenu');
+        const userBtn = document.getElementById('userBtn');
+        const userMenu = document.getElementById('userMenu');
+
+        menuBtn.addEventListener('click', (e) => { e.stopPropagation(); mainMenu.classList.toggle('show'); userMenu.classList.remove('show'); });
+        userBtn.addEventListener('click', (e) => { e.stopPropagation(); userMenu.classList.toggle('show'); mainMenu.classList.remove('show'); });
+        document.addEventListener('click', () => { mainMenu.classList.remove('show'); userMenu.classList.remove('show'); });
+
+        // Lógica del modo Ejemplo
+        document.getElementById('demoBtn').addEventListener('click', (e) => {
+            e.preventDefault();
+            localStorage.setItem('demoMode', 'true');
+            window.location.href = 'menu.html';
+        });
     </script>
 </body>
 </html>
