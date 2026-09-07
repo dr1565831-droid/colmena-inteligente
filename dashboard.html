@@ -1,51 +1,241 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+    <link rel="icon" type="image/png" href="logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Colmena 1 - Dashboard ABJ</title>
+    <title>Dashboard - Colmena Inteligente</title>
+    <script>
+        if (localStorage.getItem('theme') === 'light') {
+            document.documentElement.classList.add('light-mode');
+        }
+    </script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background-color: #f4f4f9; margin: 0; }
-        .header-container { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-        .nav-back { text-decoration: none; color: #4CAF50; font-weight: bold; }
-        h1 { color: #333; margin: 0; text-align: center; flex-grow: 1; }
+        :root {
+            --bg-color: #0f0f0f;
+            --card-bg: rgba(26, 26, 26, 0.95); 
+            --amarillo-miel: #ffb300;
+            --cafe-dorado: #b8860b;
+            --text-color: #e0e0e0;
+        }
+
+        :root.light-mode {
+            --bg-color: #f5f5f5;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --amarillo-miel: #d68900;
+            --cafe-dorado: #a87b00;
+            --text-color: #222222;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="98" viewBox="0 0 56 98"><path d="M28 0 L56 16.16 L56 48.49 L28 64.65 L0 48.49 L0 16.16 Z M28 98 L56 81.84 L56 49.51 L28 33.35 L0 49.51 L0 81.84 Z" fill="none" stroke="rgba(255, 179, 0, 0.05)" stroke-width="1"/></svg>');
+            background-size: 56px 98px;
+            color: var(--text-color);
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        :root.light-mode body {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="98" viewBox="0 0 56 98"><path d="M28 0 L56 16.16 L56 48.49 L28 64.65 L0 48.49 L0 16.16 Z M28 98 L56 81.84 L56 49.51 L28 33.35 L0 49.51 L0 81.84 Z" fill="none" stroke="rgba(214, 137, 0, 0.15)" stroke-width="1"/></svg>');
+        }
+
+        .header-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 40px;
+        }
+
+        .logo-app {
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            color: var(--amarillo-miel);
+            text-shadow: 0 0 15px rgba(255, 179, 0, 0.4);
+            margin: 0;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .list-container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+            max-width: 750px;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .sensor-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--card-bg);
+            border: 2px solid var(--cafe-dorado);
+            border-radius: 15px;
+            padding: 15px 25px;
+            gap: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            transition: border-color 0.3s, background-color 0.3s;
+        }
+        .sensor-row:hover {
+            border-color: var(--amarillo-miel);
+        }
+
+        .sensor-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            flex-grow: 1;
+        }
+
+        .label {
+            font-size: 0.8rem;
+            color: var(--amarillo-miel);
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            margin-bottom: 4px;
+        }
+
+        .valor {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text-color);
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+        }
+
+        .action-btn {
+            background-color: transparent;
+            border: 1px solid var(--cafe-dorado);
+            color: var(--text-color);
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn:hover {
+            background-color: var(--amarillo-miel);
+            color: #111111;
+            border-color: var(--amarillo-miel);
+            transform: translateY(-2px);
+        }
+
+        .alert-noise { color: #ff4444 !important; }
+        .status-quiet { color: #00b35e !important; }
+        :root:not(.light-mode) .status-quiet { color: #00ff88 !important; }
         
-        table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
-        th, td { padding: 15px; border-bottom: 1px solid #ddd; text-align: center; }
-        th { background-color: #4CAF50; color: white; }
-        tr:nth-child(even) { background-color: #f9f9f9; }
-        tr:hover { background-color: #f1f1f1; }
+        .btn-back {
+            margin-top: 40px;
+            background: transparent;
+            color: var(--text-color);
+            border: 1px solid var(--cafe-dorado);
+            padding: 10px 22px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+        .btn-back:hover {
+            color: var(--amarillo-miel);
+            border-color: var(--amarillo-miel);
+        }
     </style>
 </head>
 <body>
 
     <div class="header-container">
-        <a href="index.html" class="nav-back">← Volver al Inicio</a>
-        <h1>Dashboard: Colmena 1</h1>
-        <div style="width: 120px;"></div> <!-- Espaciador para centrar el título -->
+        <img src="logo.png" alt="Logo" class="logo-app">
+        <h1>Datos: Colmena 1</h1>
     </div>
 
-    <table id="tabla-datos">
-        <thead>
-            <tr>
-                <th>Fecha y Hora</th>
-                <th>🐝 Abejas</th>
-                <th>🌡️ Temp (°C)</th>
-                <th>💧 Humedad (%)</th>
-                <th>⚖️ Peso</th>
-                <th>🔊 Ruido</th>
-            </tr>
-        </thead>
-        <tbody id="tbody-datos">
-            <tr><td colspan="6">Conectando con los sensores de la Colmena 1...</td></tr>
-        </tbody>
-    </table>
+    <div class="list-container">
+        
+        <div class="sensor-row">
+            <div class="sensor-info">
+                <div class="label">Población Actual</div>
+                <span id="abejas_val" class="valor">--</span>
+            </div>
+            <div class="btn-group">
+                <button class="action-btn" onclick="window.location.href='graficas.html?sensor=poblacion'">Gráficas</button>
+                <button class="action-btn" onclick="window.location.href='historico.html?sensor=poblacion'">Valor Histórico</button>
+            </div>
+        </div>
+
+        <div class="sensor-row">
+            <div class="sensor-info">
+                <div class="label">Temperatura</div>
+                <span id="temp_val" class="valor">-- °C</span>
+            </div>
+            <div class="btn-group">
+                <button class="action-btn" onclick="window.location.href='graficas.html?sensor=temperatura'">Gráficas</button>
+                <button class="action-btn" onclick="window.location.href='historico.html?sensor=temperatura'">Valor Histórico</button>
+            </div>
+        </div>
+
+        <div class="sensor-row">
+            <div class="sensor-info">
+                <div class="label">Humedad</div>
+                <span id="hum_val" class="valor">-- %</span>
+            </div>
+            <div class="btn-group">
+                <button class="action-btn" onclick="window.location.href='graficas.html?sensor=humedad'">Gráficas</button>
+                <button class="action-btn" onclick="window.location.href='historico.html?sensor=humedad'">Valor Histórico</button>
+            </div>
+        </div>
+
+        <div class="sensor-row">
+            <div class="sensor-info">
+                <div class="label">Peso Estimado</div>
+                <span id="peso_val" class="valor">-- g</span>
+            </div>
+            <div class="btn-group">
+                <button class="action-btn" onclick="window.location.href='graficas.html?sensor=peso'">Gráficas</button>
+                <button class="action-btn" onclick="window.location.href='historico.html?sensor=peso'">Valor Histórico</button>
+            </div>
+        </div>
+
+        <div class="sensor-row">
+            <div class="sensor-info">
+                <div class="label">Estatus Ruido</div>
+                <span id="ruido_val" class="valor">--</span>
+            </div>
+            <div class="btn-group">
+                <button class="action-btn" onclick="window.location.href='graficas.html?sensor=ruido'">Gráficas</button>
+                <button class="action-btn" onclick="window.location.href='historico.html?sensor=ruido'">Valor Histórico</button>
+            </div>
+        </div>
+
+    </div>
+
+    <button id="backBtn" class="btn-back">⬅ Volver al Menú</button>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-        import { getDatabase, ref, onValue, query, limitToLast } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-        // Configuración de tu base de datos Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyBwKBot_swtev-g7OxwFP9Jk_q2EGsAPnA",
             authDomain: "colmenainteligente-ee7a8.firebaseapp.com",
@@ -57,40 +247,58 @@
         };
 
         const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
         const db = getDatabase(app);
 
-        // Referencia al historial, limitando a los últimos 20 registros
-        const historialRef = query(ref(db, 'historial/'), limitToLast(20));
+        // --- INICIO DE LÓGICA ACTUALIZADA PARA MODO EJEMPLO ---
+        const isDemo = localStorage.getItem('demoMode') === 'true';
 
-        onValue(historialRef, (snapshot) => {
-            const data = snapshot.val();
-            const tbody = document.getElementById('tbody-datos');
-            tbody.innerHTML = ''; 
+        if (isDemo) {
+            inicializarLecturaDatos();
+        } else {
+            onAuthStateChanged(auth, (user) => {
+                if (!user) window.location.href = "login.html";
+                else inicializarLecturaDatos();
+            });
+        }
+        // --- FIN DE LÓGICA ACTUALIZADA ---
 
-            if (data) {
-                // Invertir para mostrar los datos más recientes en la parte superior
-                const keys = Object.keys(data).reverse();
-                
-                keys.forEach((key) => {
-                    const item = data[key];
-                    const fila = document.createElement('tr');
-                    
-                    const fechaObj = new Date(item.fecha);
-                    const fecha = fechaObj.toLocaleString();
+        function inicializarLecturaDatos() {
+            onValue(ref(db, 'colmena/cantidad_abejas'), (snapshot) => {
+                const data = snapshot.val();
+                document.getElementById("abejas_val").innerText = data !== null ? data + " 🐝" : "0 🐝";
+            });
 
-                    fila.innerHTML = `
-                        <td>${fecha}</td>
-                        <td><strong>${item.abejas}</strong></td>
-                        <td>${item.temp ? item.temp.toFixed(1) : 'N/A'}</td>
-                        <td>${item.hum ? item.hum.toFixed(1) : 'N/A'}</td>
-                        <td>${item.peso ? item.peso.toFixed(2) : '0'}</td>
-                        <td>${item.ruido ? "Detectado" : "Normal"}</td>
-                    `;
-                    tbody.appendChild(fila);
-                });
-            } else {
-                tbody.innerHTML = '<tr><td colspan="6">No hay datos registrados aún.</td></tr>';
-            }
+            onValue(ref(db, 'colmena/temperatura'), (snapshot) => {
+                const data = snapshot.val();
+                document.getElementById("temp_val").innerText = data !== null ? parseFloat(data).toFixed(1) + " °C" : "-- °C";
+            });
+
+            onValue(ref(db, 'colmena/humedad'), (snapshot) => {
+                const data = snapshot.val();
+                document.getElementById("hum_val").innerText = data !== null ? parseFloat(data).toFixed(0) + " %" : "-- %";
+            });
+
+            onValue(ref(db, 'colmena/peso'), (snapshot) => {
+                const data = snapshot.val();
+                document.getElementById("peso_val").innerText = data !== null ? data + " g" : "-- g";
+            });
+
+            onValue(ref(db, 'colmena/ruido'), (snapshot) => {
+                const isNoisy = snapshot.val();
+                const el = document.getElementById("ruido_val");
+                if (isNoisy) {
+                    el.innerText = "ALBOROTO";
+                    el.className = "valor alert-noise";
+                } else {
+                    el.innerText = "ESTABLE";
+                    el.className = "valor status-quiet";
+                }
+            });
+        }
+
+        document.getElementById('backBtn').addEventListener('click', () => {
+            window.location.href = "menu.html";
         });
     </script>
 </body>
