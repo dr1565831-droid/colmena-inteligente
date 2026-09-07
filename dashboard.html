@@ -2,29 +2,96 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Colmena 1 - Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Colmena 1 - Dashboard ABJ</title>
     <style>
-        body { font-family: sans-serif; text-align: center; background: #f4f4f9; padding: 40px; }
-        h1 { color: #4CAF50; }
-        .nav-back { text-decoration: none; color: #888; position: absolute; left: 30px; top: 30px; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; max-width: 800px; margin: 40px auto; }
-        .boton { padding: 25px; background: white; color: #333; border: 2px solid #4CAF50; border-radius: 10px; cursor: pointer; text-decoration: none; font-size: 18px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: 0.2s; }
-        .boton:hover { background: #4CAF50; color: white; transform: translateY(-3px); }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 20px; background-color: #f4f4f9; margin: 0; }
+        .header-container { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
+        .nav-back { text-decoration: none; color: #4CAF50; font-weight: bold; }
+        h1 { color: #333; margin: 0; text-align: center; flex-grow: 1; }
+        
+        table { width: 100%; border-collapse: collapse; background: white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); border-radius: 8px; overflow: hidden; }
+        th, td { padding: 15px; border-bottom: 1px solid #ddd; text-align: center; }
+        th { background-color: #4CAF50; color: white; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        tr:hover { background-color: #f1f1f1; }
     </style>
 </head>
 <body>
-    <a href="index.html" class="nav-back">← Volver al Inicio</a>
-    
-    <h1>Estado: Colmena 1</h1>
-    <p>Selecciona una variable para ver su historial en tiempo real</p>
 
-    <!-- Estos enlaces conectan con tus archivos de gráficas generados anteriormente -->
-    <div class="grid">
-        <a href="abejas.html" class="boton">🐝 Población</a>
-        <a href="temperatura.html" class="boton">🌡️ Temperatura</a>
-        <a href="humedad.html" class="boton">💧 Humedad</a>
-        <a href="peso.html" class="boton">⚖️ Peso</a>
-        <a href="ruido.html" class="boton">🔊 Ruido</a>
+    <div class="header-container">
+        <a href="index.html" class="nav-back">← Volver al Inicio</a>
+        <h1>Dashboard: Colmena 1</h1>
+        <div style="width: 120px;"></div> <!-- Espaciador para centrar el título -->
     </div>
+
+    <table id="tabla-datos">
+        <thead>
+            <tr>
+                <th>Fecha y Hora</th>
+                <th>🐝 Abejas</th>
+                <th>🌡️ Temp (°C)</th>
+                <th>💧 Humedad (%)</th>
+                <th>⚖️ Peso</th>
+                <th>🔊 Ruido</th>
+            </tr>
+        </thead>
+        <tbody id="tbody-datos">
+            <tr><td colspan="6">Conectando con los sensores de la Colmena 1...</td></tr>
+        </tbody>
+    </table>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+        import { getDatabase, ref, onValue, query, limitToLast } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js";
+
+        // Configuración de tu base de datos Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBwKBot_swtev-g7OxwFP9Jk_q2EGsAPnA",
+            authDomain: "colmenainteligente-ee7a8.firebaseapp.com",
+            databaseURL: "https://colmenainteligente-ee7a8-default-rtdb.firebaseio.com",
+            projectId: "colmenainteligente-ee7a8",
+            storageBucket: "colmenainteligente-ee7a8.firebasestorage.app",
+            messagingSenderId: "454952379571",
+            appId: "1:454952379571:web:4555ea465685074614bcc6"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Referencia al historial, limitando a los últimos 20 registros
+        const historialRef = query(ref(db, 'historial/'), limitToLast(20));
+
+        onValue(historialRef, (snapshot) => {
+            const data = snapshot.val();
+            const tbody = document.getElementById('tbody-datos');
+            tbody.innerHTML = ''; 
+
+            if (data) {
+                // Invertir para mostrar los datos más recientes en la parte superior
+                const keys = Object.keys(data).reverse();
+                
+                keys.forEach((key) => {
+                    const item = data[key];
+                    const fila = document.createElement('tr');
+                    
+                    const fechaObj = new Date(item.fecha);
+                    const fecha = fechaObj.toLocaleString();
+
+                    fila.innerHTML = `
+                        <td>${fecha}</td>
+                        <td><strong>${item.abejas}</strong></td>
+                        <td>${item.temp ? item.temp.toFixed(1) : 'N/A'}</td>
+                        <td>${item.hum ? item.hum.toFixed(1) : 'N/A'}</td>
+                        <td>${item.peso ? item.peso.toFixed(2) : '0'}</td>
+                        <td>${item.ruido ? "Detectado" : "Normal"}</td>
+                    `;
+                    tbody.appendChild(fila);
+                });
+            } else {
+                tbody.innerHTML = '<tr><td colspan="6">No hay datos registrados aún.</td></tr>';
+            }
+        });
+    </script>
 </body>
 </html>
