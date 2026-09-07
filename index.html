@@ -1,161 +1,99 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <link rel="icon" type="image/png" href="logo.png">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Colmena Inteligente</title>
-    <script>
-        if (localStorage.getItem('theme') === 'light') {
-            document.documentElement.classList.add('light-mode');
-        }
-    </script>
+    <title>ABJ - Inicio</title>
     <style>
-        :root {
-            --bg-color: #0f0f0f;
-            --amarillo-miel: #ffb300;
-            --cafe-dorado: #b8860b;
-            --card-bg: rgba(26, 26, 26, 0.9);
-            --text-color: #e0e0e0;
-        }
+        body { font-family: sans-serif; margin: 0; padding: 0; background-color: #f9f9f9; color: #333; }
+        
+        /* Navbar */
+        .navbar { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 15px 30px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); position: relative; }
+        .nav-btn { background: none; border: none; font-size: 24px; cursor: pointer; }
+        
+        /* Logo Central */
+        .centro-header { display: flex; align-items: center; gap: 15px; text-align: left; }
+        .logo-placeholder { width: 50px; height: 50px; background: #ddd; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 10px; color: #888; }
+        .marca h1 { margin: 0; font-size: 24px; color: #4CAF50; }
+        .marca p { margin: 0; font-size: 12px; color: #666; }
 
-        :root.light-mode {
-            --bg-color: #f5f5f5;
-            --amarillo-miel: #d68900;
-            --cafe-dorado: #a87b00;
-            --card-bg: rgba(255, 255, 255, 0.95);
-            --text-color: #222222;
-        }
+        /* Menús Desplegables */
+        .dropdown { display: none; position: absolute; top: 70px; background: white; box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-radius: 5px; flex-direction: column; width: 180px; z-index: 100; }
+        .dropdown a { padding: 12px 20px; text-decoration: none; color: #333; border-bottom: 1px solid #eee; }
+        .dropdown a:hover { background: #f0f0f0; }
+        #menu-izq { left: 30px; }
+        #menu-der { right: 30px; }
 
-        body { 
-            font-family: 'Segoe UI', Roboto, sans-serif; 
-            background-color: var(--bg-color); 
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="98" viewBox="0 0 56 98"><path d="M28 0 L56 16.16 L56 48.49 L28 64.65 L0 48.49 L0 16.16 Z M28 98 L56 81.84 L56 49.51 L28 33.35 L0 49.51 L0 81.84 Z" fill="none" stroke="rgba(184, 134, 11, 0.15)" stroke-width="1"/></svg>');
-            background-size: 56px 98px;
-            display: flex; 
-            justify-content: center; 
-            align-items: center; 
-            height: 100vh; 
-            margin: 0; 
-            transition: background-color 0.3s, color 0.3s;
-        }
-
-        :root.light-mode body {
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="98" viewBox="0 0 56 98"><path d="M28 0 L56 16.16 L56 48.49 L28 64.65 L0 48.49 L0 16.16 Z M28 98 L56 81.84 L56 49.51 L28 33.35 L0 49.51 L0 81.84 Z" fill="none" stroke="rgba(214, 137, 0, 0.15)" stroke-width="1"/></svg>');
-        }
-
-        .login-card { 
-            background: var(--card-bg); 
-            padding: 40px; 
-            border-radius: 20px; 
-            border: 2px solid var(--cafe-dorado);
-            backdrop-filter: blur(10px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3); 
-            text-align: center; 
-            max-width: 380px;
-            width: 100%;
-            transition: background-color 0.3s, border-color 0.3s;
-        }
-
-        .header-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .logo-app {
-            width: 60px;
-            height: 60px;
-            object-fit: contain;
-        }
-
-        h1 { 
-            color: var(--amarillo-miel); 
-            text-shadow: 0 0 15px rgba(255, 179, 0, 0.4);
-            margin: 0;
-            font-size: 2.5rem;
-            font-weight: 900;
-            letter-spacing: 4px;
-        }
-
-        p {
-            color: var(--text-color);
-            font-size: 0.95rem;
-            margin-bottom: 30px;
-            font-weight: 500;
-        }
-
-        .btn-google { 
-            background-color: #ffffff; 
-            color: #111111; 
-            border: none; 
-            padding: 12px 24px; 
-            border-radius: 30px; 
-            font-size: 16px; 
-            font-weight: bold;
-            cursor: pointer; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            gap: 12px;
-            transition: all 0.3s ease; 
-            margin: 20px auto;
-            width: 100%;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-
-        .btn-google:hover { 
-            background-color: var(--amarillo-miel); 
-            transform: translateY(-3px);
-            box-shadow: 0 6px 20px rgba(255, 179, 0, 0.4);
-        }
-
-        .google-icon { width: 22px; }
+        /* Secciones */
+        .seccion { display: flex; justify-content: space-between; align-items: center; padding: 50px; max-width: 1000px; margin: 20px auto; background: white; border-radius: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); gap: 40px; }
+        .texto-seccion { flex: 1; }
+        .texto-seccion h2 { color: #4CAF50; }
+        .imagen-placeholder { flex: 1; height: 250px; background: #e0e0e0; display: flex; justify-content: center; align-items: center; color: #888; border-radius: 10px; }
+        .btn-accion { display: inline-block; margin-top: 15px; padding: 10px 20px; background: #4CAF50; color: white; text-decoration: none; border-radius: 5px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <div class="login-card">
-        <div class="header-container">
-            <img src="logo.png" alt="Logo" class="logo-app">
-            <h1>ABJ</h1>
+    <!-- Encabezado -->
+    <header class="navbar">
+        <button class="nav-btn" onclick="toggleMenu('menu-izq')">☰</button>
+        <div id="menu-izq" class="dropdown">
+            <a href="index.html">Inicio</a>
+            <a href="productos.html">Productos</a>
+            <a href="#">Ayuda</a>
         </div>
-        <p>Monitoreo Automatizado de colmenas</p>
-        
-        <button id="loginBtn" class="btn-google">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/c/c1/Google_%22G%22_logo.svg" alt="Google" class="google-icon">
-            Entrar con Google
-        </button>
-    </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithPopup, GoogleAuthProvider } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        <div class="centro-header">
+            <div class="logo-placeholder">LOGO</div>
+            <div class="marca">
+                <h1>ABJ</h1>
+                <p>sistema de monitoreo inteligente</p>
+            </div>
+        </div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBwKBot_swtev-g7OxwFP9Jk_q2EGsAPnA",
-            authDomain: "colmenainteligente-ee7a8.firebaseapp.com",
-            databaseURL: "https://colmenainteligente-ee7a8-default-rtdb.firebaseio.com",
-            projectId: "colmenainteligente-ee7a8",
-            storageBucket: "colmenainteligente-ee7a8.firebasestorage.app",
-            messagingSenderId: "454952379571",
-            appId: "1:454952379571:web:4555ea465685074614bcc6"
-        };
+        <button class="nav-btn" onclick="toggleMenu('menu-der')">👤</button>
+        <div id="menu-der" class="dropdown">
+            <a href="login.html">Iniciar Sesión</a>
+            <a href="login.html">Crear Cuenta</a>
+            <a href="dashboard_colmena.html">Ejemplo (Colmena 1)</a>
+        </div>
+    </header>
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const provider = new GoogleAuthProvider();
+    <!-- Sección 1: KITS -->
+    <section class="seccion">
+        <div class="texto-seccion">
+            <h2>KITS ABJ</h2>
+            <p>Descubre nuestra tecnología diseñada para optimizar el cuidado de tus abejas. Monitoreo en tiempo real para apicultores modernos.</p>
+            <a href="productos.html" class="btn-accion">Ver Productos</a>
+        </div>
+        <div class="imagen-placeholder">Espacio para Imagen Kit</div>
+    </section>
 
-        document.getElementById('loginBtn').addEventListener('click', () => {
-            signInWithPopup(auth, provider)
-                .then(() => {
-                    window.location.href = "menu.html";
-                }).catch((error) => {
-                    console.error("Error en login:", error.message);
-                });
-        });
+    <!-- Sección 2: Empezar -->
+    <section class="seccion">
+        <div class="texto-seccion">
+            <h2>EMPEZAR ES FACIL</h2>
+            <p>Instala los sensores en tu colmena, conecta el sistema a tu red y comienza a recibir datos inmediatamente en tu panel de control.</p>
+        </div>
+        <div class="imagen-placeholder">Espacio para Imagen Empezar</div>
+    </section>
+
+    <!-- Sección 3: Quienes Somos -->
+    <section class="seccion">
+        <div class="texto-seccion">
+            <h2>QUIENES SOMOS</h2>
+            <p>Somos un equipo comprometido con la preservación de las abejas y la modernización de la apicultura mediante tecnología accesible y confiable.</p>
+        </div>
+        <div class="imagen-placeholder">Espacio para Imagen Equipo</div>
+    </section>
+
+    <script>
+        function toggleMenu(id) {
+            document.getElementById('menu-izq').style.display = 'none';
+            document.getElementById('menu-der').style.display = 'none';
+            const menu = document.getElementById(id);
+            menu.style.display = menu.style.display === 'flex' ? 'none' : 'flex';
+        }
     </script>
 </body>
 </html>
