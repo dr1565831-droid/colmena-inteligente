@@ -59,9 +59,9 @@
         }
         .dropdown a:hover { background: var(--amarillo-miel); color: #000; }
 
-        /* Contenido */
+        /* Contenido y Tarjetas */
         .container { max-width: 900px; margin: 40px auto; padding: 0 20px; display: flex; flex-direction: column; gap: 40px; }
-
+        
         .section-card {
             display: flex; align-items: center; background: var(--card-bg);
             border: 2px solid var(--cafe-dorado); border-radius: 20px; padding: 30px;
@@ -69,10 +69,27 @@
         }
         .section-text { flex: 1; }
         .section-text h2 { color: var(--amarillo-miel); margin-top: 0; }
+        
+        /* Contenedor de las imágenes */
         .section-img {
-            flex: 1; min-height: 200px; background: rgba(0,0,0,0.2);
-            border: 2px dashed var(--cafe-dorado); border-radius: 15px;
-            display: flex; align-items: center; justify-content: center; color: #888;
+            flex: 1; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
+        }
+        
+        /* Ajuste de tamaño de las imágenes */
+        .section-img img {
+            max-width: 100%;       /* Para que no desborde el contenedor ancho */
+            max-height: 220px;     /* Altura máxima para controlar el tamaño */
+            height: auto;
+            object-fit: contain;   /* Mantiene la proporción sin deformar */
+            border-radius: 10px;   /* Suaviza un poco los bordes de la imagen */
+            transition: transform 0.3s;
+        }
+
+        .section-img img:hover {
+            transform: scale(1.05); /* Efecto sutil de zoom al pasar el mouse */
         }
 
         .btn-primary {
@@ -81,9 +98,10 @@
             text-decoration: none; font-weight: bold; transition: all 0.3s; margin-top: 15px;
         }
         .btn-primary:hover { background: var(--amarillo-miel); color: #000; border-color: var(--amarillo-miel); }
-
+        
         @media (max-width: 768px) {
-            .section-card { flex-direction: column; }
+            .section-card { flex-direction: column; text-align: center; }
+            .section-img img { max-height: 180px; } /* Más pequeño en móviles */
         }
     </style>
 </head>
@@ -116,32 +134,38 @@
     </nav>
 
     <div class="container">
+        <!-- SECCIÓN 1 -->
         <div class="section-card">
             <div class="section-text">
                 <h2>KITS ABJ</h2>
                 <p>Nuestros kits de monitoreo están diseñados para brindarte la información más precisa sobre el estado de tu colmena. Todo desde la palma de tu mano.</p>
                 <a href="productos.html" class="btn-primary">Ver Productos</a>
             </div>
-            <div class="section-img">[ Espacio para Imagen ]</div>
-            <div class="section-img"><img src="pcb (1).png"></div>
+            <div class="section-img">
+                <img src="pcb (1).png" alt="Kit PCB ABJ">
+            </div>
         </div>
 
+        <!-- SECCIÓN 2 -->
         <div class="section-card">
             <div class="section-text">
                 <h2>EMPEZAR ES FÁCIL</h2>
                 <p>Instala los sensores en tu colmena en cuestión de minutos, conéctalos a la red y comienza a recibir datos en tiempo real de temperatura, humedad y más.</p>
             </div>
-            <div class="section-img">[ Espacio para Imagen ]</div>
-            <div class="section-img"><img src="curiabj.png"></div>
+            <div class="section-img">
+                <img src="curiabj.png" alt="Empezar es fácil">
+            </div>
         </div>
 
+        <!-- SECCIÓN 3 -->
         <div class="section-card">
             <div class="section-text">
                 <h2>QUIÉNES SOMOS</h2>
                 <p>Somos un equipo comprometido con la preservación de las abejas y la innovación agrícola, integrando tecnología IoT para un futuro sustentable.</p>
             </div>
-            <div class="section-img">[ Espacio para Imagen ]</div>
-            <div class="section-img"><img src="gays.jpg"></div>
+            <div class="section-img">
+                <img src="gays.jpg" alt="Quiénes somos">
+            </div>
         </div>
     </div>
 
@@ -163,9 +187,5 @@
             window.location.href = 'menu.html';
         });
     </script>
-</body>
-</html>
-    </div>
-
 </body>
 </html>
