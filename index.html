@@ -5,160 +5,218 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inicio - Colmena Inteligente</title>
-    <script>
-        if (localStorage.getItem('theme') === 'light') { document.documentElement.classList.add('light-mode'); }
-    </script>
+
     <style>
         :root {
-            --bg-color: #0f0f0f; --amarillo-miel: #ffb300; --cafe-dorado: #b8860b;
-            --card-bg: rgba(26, 26, 26, 0.9); --text-color: #e0e0e0;
-        }
-        :root.light-mode {
-            --bg-color: #f5f5f5; --amarillo-miel: #d68900; --cafe-dorado: #a87b00;
-            --card-bg: rgba(255, 255, 255, 0.95); --text-color: #222222;
+            --bg-color: #0f0f0f;
+            --amarillo-miel: #ffb300;
+            --cafe-dorado: #b8860b;
+            --card-bg: rgba(26, 26, 26, 0.9);
+            --text-color: #e0e0e0;
         }
 
-        body { 
-            font-family: 'Segoe UI', Roboto, sans-serif; background-color: var(--bg-color); 
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="56" height="98" viewBox="0 0 56 98"><path d="M28 0 L56 16.16 L56 48.49 L28 64.65 L0 48.49 L0 16.16 Z M28 98 L56 81.84 L56 49.51 L28 33.35 L0 49.51 L0 81.84 Z" fill="none" stroke="rgba(184, 134, 11, 0.15)" stroke-width="1"/></svg>');
-            color: var(--text-color); margin: 0; transition: background-color 0.3s, color 0.3s;
+        body {
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
         }
 
         /* Navbar */
         .navbar {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 15px 30px; background: var(--card-bg); border-bottom: 2px solid var(--cafe-dorado);
-            position: sticky; top: 0; z-index: 1000; box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background: var(--card-bg);
+            border-bottom: 2px solid var(--cafe-dorado);
         }
 
-        .nav-left, .nav-right { position: relative; }
-
-        .icon-btn {
-            background: transparent; border: none; color: var(--text-color);
-            font-size: 1.8rem; cursor: pointer; transition: color 0.3s;
+        .nav-center {
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
-        .icon-btn:hover { color: var(--amarillo-miel); }
 
-        .nav-center { display: flex; align-items: center; gap: 15px; text-align: left; }
-        .nav-center img { width: 50px; height: 50px; object-fit: contain; }
-        .brand-titles h1 { margin: 0; color: var(--amarillo-miel); font-size: 1.8rem; letter-spacing: 2px; }
-        .brand-titles span { font-size: 0.8rem; color: var(--text-color); }
-
-        /* Menús Desplegables */
-        .dropdown {
-            position: absolute; top: 50px; background: var(--card-bg); border: 1px solid var(--cafe-dorado);
-            border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); padding: 10px 0;
-            display: none; flex-direction: column; min-width: 150px;
+        .nav-center img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
         }
-        .nav-left .dropdown { left: 0; }
-        .nav-right .dropdown { right: 0; }
-        .dropdown.show { display: flex; }
-        .dropdown a {
-            color: var(--text-color); text-decoration: none; padding: 10px 20px;
-            font-weight: bold; transition: background 0.2s;
-        }
-        .dropdown a:hover { background: var(--amarillo-miel); color: #000; }
 
         /* Contenido */
-        .container { max-width: 900px; margin: 40px auto; padding: 0 20px; display: flex; flex-direction: column; gap: 40px; }
-        
-        .section-card {
-            display: flex; align-items: center; background: var(--card-bg);
-            border: 2px solid var(--cafe-dorado); border-radius: 20px; padding: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2); gap: 30px;
-        }
-        .section-text { flex: 1; }
-        .section-text h2 { color: var(--amarillo-miel); margin-top: 0; }
-        .section-img {
-            flex: 1; min-height: 200px; background: rgba(0,0,0,0.2);
-            border: 2px dashed var(--cafe-dorado); border-radius: 15px;
-            display: flex; align-items: center; justify-content: center; color: #888;
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 0 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 40px;
         }
 
-        .btn-primary {
-            display: inline-block; background: transparent; color: var(--text-color);
-            border: 2px solid var(--cafe-dorado); padding: 10px 20px; border-radius: 20px;
-            text-decoration: none; font-weight: bold; transition: all 0.3s; margin-top: 15px;
+        .section-card {
+            display: flex;
+            align-items: center;
+            background: var(--card-bg);
+            border: 2px solid var(--cafe-dorado);
+            border-radius: 20px;
+            padding: 30px;
+            gap: 30px;
         }
-        .btn-primary:hover { background: var(--amarillo-miel); color: #000; border-color: var(--amarillo-miel); }
-        
-        @media (max-width: 768px) {
-            .section-card { flex-direction: column; }
+
+        .section-text {
+            flex: 1;
         }
+
+        .section-text h2 {
+            color: var(--amarillo-miel);
+            margin-top: 0;
+        }
+
+        .section-img {
+            flex: 1;
+            min-height: 200px;
+            background: rgba(0,0,0,0.2);
+            border: 2px dashed var(--cafe-dorado);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* =============================== */
+        /* TAMAÑO GENERAL DE LAS IMÁGENES  */
+        /* =============================== */
+
+        .section-img img {
+            object-fit: contain;
+        }
+
+        /* =============================== */
+        /* TAMAÑO DE PCB                   */
+        /* =============================== */
+
+        .pcb {
+            width: 100px;      /* CAMBIA ESTE VALOR */
+            height: 100px;     /* CAMBIA ESTE VALOR */
+        }
+
+        /* =============================== */
+        /* TAMAÑO DE CURIABJ                */
+        /* =============================== */
+
+        .curi {
+            width: 100px;      /* CAMBIA ESTE VALOR */
+            height: 100px;     /* CAMBIA ESTE VALOR */
+        }
+
+        /* =============================== */
+        /* TAMAÑO DE GAYS                   */
+        /* =============================== */
+
+        .gays {
+            width: 100px;      /* CAMBIA ESTE VALOR */
+            height: 100px;     /* CAMBIA ESTE VALOR */
+        }
+
     </style>
 </head>
+
 <body>
 
     <nav class="navbar">
-        <div class="nav-left">
-            <button class="icon-btn" id="menuBtn">☰</button>
-            <div id="mainMenu" class="dropdown">
-                <a href="index.html">Inicio</a>
-                <a href="productos.html">Productos</a>
-                <a href="#ayuda">Ayuda</a>
-            </div>
-        </div>
+
         <div class="nav-center">
-            <img src="logo.png" alt="Logo">
-            <div class="brand-titles">
+            <img src="logo.png">
+            <div>
                 <h1>ABJ</h1>
                 <span>sistema de monitoreo inteligente</span>
             </div>
         </div>
-        <div class="nav-right">
-            <button class="icon-btn" id="userBtn">👤</button>
-            <div id="userMenu" class="dropdown">
-                <a href="login.html">Iniciar Sesión</a>
-                <a href="registro.html">Crear Cuenta</a>
-                <a href="#" id="demoBtn">Ejemplo</a>
-            </div>
-        </div>
+
     </nav>
 
+
     <div class="container">
+
+        <!-- =============================== -->
+        <!-- PCB (1)                         -->
+        <!-- =============================== -->
+
         <div class="section-card">
+
             <div class="section-text">
+
                 <h2>KITS ABJ</h2>
-                <p>Nuestros kits de monitoreo están diseñados para brindarte la información más precisa sobre el estado de tu colmena. Todo desde la palma de tu mano.</p>
-                <a href="productos.html" class="btn-primary">Ver Productos</a>
+
+                <p>
+                    Nuestros kits de monitoreo están diseñados para brindarte
+                    la información más precisa sobre el estado de tu colmena.
+                </p>
+
             </div>
-            <div class="section-img"><img src="pcb (1).png"></div>
+
+            <div class="section-img">
+
+                <img src="pcb (1).png" class="pcb">
+
+            </div>
+
         </div>
 
+
+        <!-- =============================== -->
+        <!-- CURIABJ                         -->
+        <!-- =============================== -->
+
         <div class="section-card">
+
             <div class="section-text">
+
                 <h2>EMPEZAR ES FÁCIL</h2>
-                <p>Instala los sensores en tu colmena en cuestión de minutos, conéctalos a la red y comienza a recibir datos en tiempo real de temperatura, humedad y más.</p>
+
+                <p>
+                    Instala los sensores en tu colmena en cuestión de minutos,
+                    conéctalos a la red y comienza a recibir datos en tiempo real.
+                </p>
+
             </div>
-            <div class="section-img"><img src="curiabj.png"></div>
+
+            <div class="section-img">
+
+                <img src="curiabj.png" class="curi">
+
+            </div>
+
         </div>
 
+
+        <!-- =============================== -->
+        <!-- GAYS                            -->
+        <!-- =============================== -->
+
         <div class="section-card">
+
             <div class="section-text">
+
                 <h2>QUIÉNES SOMOS</h2>
-                <p>Somos un equipo comprometido con la preservación de las abejas y la innovación agrícola, integrando tecnología IoT para un futuro sustentable.</p>
+
+                <p>
+                    Somos un equipo comprometido con la preservación de las abejas
+                    y la innovación agrícola.
+                </p>
+
             </div>
-            <div class="section-img"><img src="gays.jpg"></div>
+
+            <div class="section-img">
+
+                <img src="gays.jpg" class="gays">
+
+            </div>
+
         </div>
+
     </div>
 
-    <script>
-        // Lógica de menús
-        const menuBtn = document.getElementById('menuBtn');
-        const mainMenu = document.getElementById('mainMenu');
-        const userBtn = document.getElementById('userBtn');
-        const userMenu = document.getElementById('userMenu');
-
-        menuBtn.addEventListener('click', (e) => { e.stopPropagation(); mainMenu.classList.toggle('show'); userMenu.classList.remove('show'); });
-        userBtn.addEventListener('click', (e) => { e.stopPropagation(); userMenu.classList.toggle('show'); mainMenu.classList.remove('show'); });
-        document.addEventListener('click', () => { mainMenu.classList.remove('show'); userMenu.classList.remove('show'); });
-
-        // Lógica del modo Ejemplo
-        document.getElementById('demoBtn').addEventListener('click', (e) => {
-            e.preventDefault();
-            localStorage.setItem('demoMode', 'true');
-            window.location.href = 'menu.html';
-        });
-    </script>
 </body>
 </html>
